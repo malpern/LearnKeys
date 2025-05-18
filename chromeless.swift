@@ -296,11 +296,15 @@ struct ChromelessGuideView: View {
     let letters = ["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"]
     @State private var activeKeys: Set<String> = []
     @State private var globalMonitor: GlobalKeyEventMonitor? = nil
+    @State private var overlayAnimating: [String: Bool] = [:]
 
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 60) {
-                letterRow
+                ZStack {
+                    letterRow
+                    overlayAnimatedLetters
+                }
                 modifierRow
                 arrowRowWithBackground
             }
@@ -313,8 +317,12 @@ struct ChromelessGuideView: View {
                 DispatchQueue.main.async {
                     if type == .keyDown {
                         activeKeys.insert(key)
+                        overlayAnimating[key] = true
                     } else if type == .keyUp {
                         activeKeys.remove(key)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                            overlayAnimating[key] = false
+                        }
                     }
                 }
             }
@@ -322,6 +330,37 @@ struct ChromelessGuideView: View {
         .onDisappear {
             globalMonitor = nil
         }
+    }
+
+    // Overlay animated letters
+    var overlayAnimatedLetters: some View {
+        let slotWidth: CGFloat = 64
+        let slotSpacing: CGFloat = 64 * 1.2
+        let smallFontSize: CGFloat = 60
+        let largeFontSize: CGFloat = 120
+        let overlayScale: CGFloat = 1.25
+        let overlayFrameHeight: CGFloat = 160
+        let drawWidth: CGFloat = 160
+        let totalWidth = CGFloat(letters.count) * slotWidth + CGFloat(letters.count - 1) * slotSpacing
+        return ZStack {
+            ForEach(Array(letters.enumerated()), id: \.offset) { pair in
+                let index = pair.offset
+                let letter = pair.element
+                if overlayAnimating[letter.lowercased()] == true {
+                    let isActive = activeKeys.contains(letter.lowercased())
+                    Text(letter)
+                        .font(.system(size: isActive ? largeFontSize : smallFontSize, weight: isActive ? .black : .light, design: .rounded))
+                        .foregroundColor(.white)
+                        .scaleEffect(isActive ? overlayScale : 1.0)
+                        .frame(width: drawWidth, height: overlayFrameHeight)
+                        .position(x: CGFloat(index) * (slotWidth + slotSpacing) + slotWidth / 2,
+                                  y: overlayFrameHeight / 2)
+                        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isActive)
+                        .zIndex(2)
+                }
+            }
+        }
+        .frame(width: totalWidth, height: overlayFrameHeight)
     }
 
     // Letter row: 10 home row letters, equally spaced, with overlay for animated letters
@@ -339,15 +378,8 @@ struct ChromelessGuideView: View {
                 ZStack {
                     GeometryReader { geo in
                         let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-                        if activeKeys.contains(letter.lowercased()) {
-                            Text(letter)
-                                .font(.system(size: largeFontSize, weight: .black, design: .rounded))
-                                .foregroundColor(.white)
-                                .scaleEffect(overlayScale)
-                                .position(x: drawWidth / 2, y: overlayFrameHeight / 2)
-                                .transition(.scale)
-                                .animation(.spring(response: 0.25, dampingFraction: 0.7), value: activeKeys)
-                        } else {
+                        // Only show the small letter if not animating in overlay
+                        if overlayAnimating[letter.lowercased()] != true {
                             Text(letter)
                                 .font(.system(size: smallFontSize, weight: .light, design: .rounded))
                                 .foregroundColor(.white.opacity(0.7))
