@@ -1,0 +1,7 @@
+chromeless.swift:341:29: warning: initialization of immutable value 'center' was never used; consider replacing with assignment to '_' or removing it
+339 |                 ZStack {
+340 |                     GeometryReader { geo in
+341 |                         let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+    |                             `- warning: initialization of immutable value 'center' was never used; consider replacing with assignment to '_' or removing it
+342 |                         if activeKeys.contains(letter.lowercased()) {
+343 |                             Text(letter)
