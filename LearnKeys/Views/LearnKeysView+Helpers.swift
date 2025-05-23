@@ -7,76 +7,61 @@ extension LearnKeysView {
     
     // MARK: - Key State Checking
     
-    func isLetterActive(_ letter: String) -> Bool {
-        let physicalKey = letter.lowercased()
+    func isLetterActive(letter: String) -> Bool {
+        // Find the corresponding physical key and layer key for this letter position
+        guard let position = config.defsrc.firstIndex(of: letter) else { return false }
+        guard position < currentLayerKeys.count else { return false }
         
-        // In base layer, check for physical key press
-        if tcpClient.currentLayer == "base" {
-            return keyMonitor.activeKeys.contains(physicalKey)
-        }
-        
-        // In navigation layers, check if this letter position has a mapping and if that mapping is active
-        if let srcIndex = config.defsrc.firstIndex(of: physicalKey),
-           srcIndex < currentLayerKeys.count {
-            let layerKey = currentLayerKeys[srcIndex]
+        let layerKey = currentLayerKeys[position]
+        let alias: KanataAlias? = layerKey.hasPrefix("@") ? 
+            config.aliases[String(layerKey.dropFirst())] : nil
             
-            // Skip transparent keys
-            if layerKey == "_" || layerKey.isEmpty {
-                return keyMonitor.activeKeys.contains(physicalKey)
-            }
-            
-            // Check if the mapped action is active
-            let alias = layerKey.hasPrefix("@") ? config.aliases[String(layerKey.dropFirst())] : nil
-            return isKeyActive(physicalKey: physicalKey, layerKey: layerKey, alias: alias)
-        }
-        
-        return keyMonitor.activeKeys.contains(physicalKey)
+        return isKeyActive(physicalKey: letter, layerKey: layerKey, alias: alias)
     }
     
     func isKeyActive(physicalKey: String, layerKey: String, alias: KanataAlias?) -> Bool {
-        // In base layer, check for physical key press
-        if tcpClient.currentLayer == "base" {
-            return keyMonitor.activeKeys.contains(physicalKey.lowercased())
+        // Check UDP tracker for any type of key activity first (most reliable for configured keys)
+        if udpTracker.isKeyActive(physicalKey) {
+            return true
         }
         
-        // In navigation layers, check for the transformed key press
-        let resolvedAction: String
-        if layerKey.hasPrefix("@") {
-            let aliasName = String(layerKey.dropFirst())
-            if let alias = alias {
-                resolvedAction = alias.definition
-            } else {
-                // Fallback patterns
-                switch aliasName {
-                case "fnav_h": resolvedAction = "left"
-                case "fnav_j": resolvedAction = "down"
-                case "fnav_k": resolvedAction = "up"
-                case "fnav_l": resolvedAction = "right"
-                case "fnav_b": resolvedAction = "a-left"
-                case "fnav_w": resolvedAction = "a-right"
-                default: resolvedAction = layerKey
-                }
+        // For navigation layers, check UDP nav key tracker (existing functionality)
+        if tcpClient.currentLayer == "nomods" || tcpClient.currentLayer == "navfast" {
+            if udpTracker.isNavKeyActive(physicalKey) {
+                return true
             }
-        } else {
-            resolvedAction = layerKey
         }
         
-        // Map transformed actions to the keys that kanata actually sends
-        switch resolvedAction.lowercased() {
-        case "left":
-            return keyMonitor.activeKeys.contains("left")
-        case "right":
-            return keyMonitor.activeKeys.contains("right")
-        case "up":
-            return keyMonitor.activeKeys.contains("up")
-        case "down":
-            return keyMonitor.activeKeys.contains("down")
-        case "a-left", "a-right", "m-left", "m-right":
-            // For complex key combinations, we might need to check physical key too
-            return keyMonitor.activeKeys.contains(physicalKey.lowercased())
-        default:
-            return keyMonitor.activeKeys.contains(physicalKey.lowercased())
+        // Check UDP modifier tracking
+        if udpTracker.isModifierActive(physicalKey) {
+            return true
         }
+        
+        // For all layers, check for direct physical key press (fallback)
+        if keyMonitor.activeKeys.contains(physicalKey.lowercased()) {
+            return true
+        }
+        
+        // For F-nav layer, check for simple arrow key outputs (J/K work fine)
+        if tcpClient.currentLayer == "f-nav" {
+            let resolvedAction = resolveKeyActionForDisplay(layerKey: layerKey, alias: alias)
+            
+            // Check for simple navigation actions that map directly
+            switch resolvedAction.lowercased() {
+            case "down", "pgdn":
+                return keyMonitor.activeKeys.contains("pgdn")
+            case "up", "pgup":
+                return keyMonitor.activeKeys.contains("pgup")
+            case "left":
+                return keyMonitor.activeKeys.contains("left")
+            case "right":
+                return keyMonitor.activeKeys.contains("right")
+            default:
+                break
+            }
+        }
+        
+        return false
     }
     
     // MARK: - Key Data Retrieval
@@ -181,7 +166,7 @@ extension LearnKeysView {
     
     // MARK: - Display Text Processing
     
-    func resolveKeyAction(layerKey: String, alias: KanataAlias?) -> String {
+    func resolveKeyActionForDisplay(layerKey: String, alias: KanataAlias?) -> String {
         if layerKey.hasPrefix("@") {
             let aliasName = String(layerKey.dropFirst())
             if let alias = alias {

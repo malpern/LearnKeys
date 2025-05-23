@@ -1,0 +1,152 @@
+;; Test Configuration for UDP Button Press Tracking
+;; This extends the base config with UDP notifications for basic keys
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  ;; TCP server for layer tracking
+  tcp-server-address 127.0.0.1:5829
+)
+
+(defsrc
+  q w e r t y u i o p a s d f g h j k l ; z x c v b n m spc left down up right
+)
+
+(defvar
+  tap-time 200
+  hold-time 150
+  a-tap-time 300
+  a-hold-time 200
+  chord-timeout 250
+
+  left-hand-keys (
+    q w e r t
+    a s d f g
+    z x c v b
+  )
+  right-hand-keys (
+    y u i o p
+    h j k l ;
+    n m , . /
+  )
+)
+
+(deflayer base
+  q w e r t y u i o p @a_test @s_test @d_test @f_test @g_test h @j_test @k_test @l_test @semi_test z x c v b n m @spc_test _ _ _ _
+)
+
+(deflayer nomods
+  q w e r t y u i o p a s d f g h j k l ; z x c v b n m spc _ _ _ _
+)
+
+(deflayer f-nav
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @fnav_h @fnav_j @fnav_k @fnav_l _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+(deflayer navfast
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @fast_h @fast_j @fast_k @fast_l _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+(deffakekeys
+  to-base (layer-switch base)
+)
+
+(defchordsv2
+  (d f) (layer-while-held navfast) $chord-timeout all-released ()
+)
+
+(defalias
+  ;; Basic modifiers
+  shift lsft
+  control lctl
+  option lalt
+  command lmet
+  rshift rsft
+  rcontrol rctl
+  roption ralt
+  rcommand rmet
+
+  tap (multi
+    (layer-switch nomods)
+    (on-idle-fakekey to-base tap 20)
+  )
+
+  ;; Enhanced keys with UDP notifications for basic button presses
+  a_test (tap-hold-release-keys $a-tap-time $a-hold-time 
+    (multi a @tap (cmd echo "keypress:a" | nc -u 127.0.0.1 6789)) 
+    (multi @shift (cmd echo "modifier:shift:down" | nc -u 127.0.0.1 6789)) 
+    $left-hand-keys)
+    
+  s_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi s @tap (cmd echo "keypress:s" | nc -u 127.0.0.1 6789)) 
+    (multi @control (cmd echo "modifier:ctrl:down" | nc -u 127.0.0.1 6789)) 
+    $left-hand-keys)
+    
+  d_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi d @tap (cmd echo "keypress:d" | nc -u 127.0.0.1 6789)) 
+    (multi @option (cmd echo "modifier:option:down" | nc -u 127.0.0.1 6789)) 
+    $left-hand-keys)
+    
+  f_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi f @tap (cmd echo "keypress:f" | nc -u 127.0.0.1 6789)) 
+    (layer-toggle f-nav) 
+    $left-hand-keys)
+    
+  g_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi g @tap (cmd echo "keypress:g" | nc -u 127.0.0.1 6789)) 
+    (multi @command (cmd echo "modifier:cmd:down" | nc -u 127.0.0.1 6789)) 
+    $left-hand-keys)
+
+  j_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi j @tap (cmd echo "keypress:j" | nc -u 127.0.0.1 6789)) 
+    (multi @rcommand (cmd echo "modifier:cmd:down" | nc -u 127.0.0.1 6789)) 
+    $right-hand-keys)
+    
+  k_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi k @tap (cmd echo "keypress:k" | nc -u 127.0.0.1 6789)) 
+    (multi @roption (cmd echo "modifier:option:down" | nc -u 127.0.0.1 6789)) 
+    $right-hand-keys)
+    
+  l_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi l @tap (cmd echo "keypress:l" | nc -u 127.0.0.1 6789)) 
+    (multi @rcontrol (cmd echo "modifier:ctrl:down" | nc -u 127.0.0.1 6789)) 
+    $right-hand-keys)
+    
+  semi_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi ; @tap (cmd echo "keypress:;" | nc -u 127.0.0.1 6789)) 
+    (multi @rshift (cmd echo "modifier:shift:down" | nc -u 127.0.0.1 6789)) 
+    $right-hand-keys)
+
+  ;; Enhanced spacebar with UDP notification
+  spc_test (tap-hold-release-keys $tap-time $hold-time 
+    (multi spc @tap (cmd echo "keypress:spc" | nc -u 127.0.0.1 6789)) 
+    (layer-toggle f-nav) 
+    ())
+
+  ;; Navigation aliases (existing functionality)
+  fnav_h left
+  fnav_j down
+  fnav_k up
+  fnav_l right
+  fnav_w A-right
+  fnav_u C-A-S-M-u
+  
+  ;; Fast navigation with UDP notifications (existing functionality)
+  fast_h (multi M-left (cmd echo "navkey:h" | nc -u 127.0.0.1 6789))
+  fast_j (multi pgdn (cmd echo "navkey:j" | nc -u 127.0.0.1 6789))
+  fast_k (multi pgup (cmd echo "navkey:k" | nc -u 127.0.0.1 6789))
+  fast_l (multi M-right (cmd echo "navkey:l" | nc -u 127.0.0.1 6789))
+  fast_w A-right
+  fast_u C-A-S-M-u
+)
+
+;; Display metadata for LearnKeys
+;;DISPLAY: fnav_h "left" "←"
+;;DISPLAY: fnav_j "down" "↓"
+;;DISPLAY: fnav_k "up" "↑"
+;;DISPLAY: fnav_l "right" "→"
+;;DISPLAY: fast_h "line start" "⇤"
+;;DISPLAY: fast_j "page down" "⇟"
+;;DISPLAY: fast_k "page up" "⇞"
+;;DISPLAY: fast_l "line end" "⇥" 

@@ -257,8 +257,8 @@ extension LearnKeysView {
     }
     
     func modifierStyleNavigationKey(physicalKey: String, layerKey: String, alias: KanataAlias?) -> some View {
-        let isActive = keyMonitor.activeKeys.contains(physicalKey.lowercased())
-        let resolvedAction = resolveKeyAction(layerKey: layerKey, alias: alias)
+        let isActive = isKeyActive(physicalKey: physicalKey, layerKey: layerKey, alias: alias)
+        let resolvedAction = resolveKeyActionForDisplay(layerKey: layerKey, alias: alias)
         
         // Extract alias name if this is an alias reference
         let aliasName: String? = layerKey.hasPrefix("@") ? String(layerKey.dropFirst()) : nil

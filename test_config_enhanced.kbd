@@ -1,0 +1,120 @@
+;; Enhanced Test Configuration with UDP Tracking
+;; This adds UDP notifications to basic keys for testing animations
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  tcp-server-address 127.0.0.1:5829
+)
+
+(defsrc
+  q w e r t y u i o p a s d f g h j k l ; z x c v b n m spc left down up right
+)
+
+(defvar
+  tap-time 200
+  hold-time 150
+  a-tap-time 300
+  a-hold-time 200
+  s-tap-time 300
+  s-hold-time 200
+  chord-timeout 250
+
+  left-hand-keys (
+    q w e r t
+    a s d f g
+    z x c v b
+  )
+  right-hand-keys (
+    y u i o p
+    h j k l ;
+    n m , . /
+  )
+)
+
+(deflayer base
+  q w e r t y u i o p @a_udp @s_udp @d @f @g h @j @k @l @; z x c v b n m @spc_udp _ _ _ _
+)
+
+(deflayer nomods
+  q w e r t y u i o p a s d f g h j k l ; z x c v b n m spc _ _ _ _
+)
+
+(deflayer f-nav
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @fnav_h @fnav_j @fnav_k @fnav_l _ _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+(deflayer navfast
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @fast_h @fast_j @fast_k @fast_l _ _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+(deffakekeys
+  to-base (layer-switch base)
+)
+
+(defchordsv2
+  (d f) (layer-while-held navfast) $chord-timeout all-released ()
+)
+
+(defalias
+  ;; Modifiers
+  shift lsft
+  control lctl
+  option lalt
+  command lmet
+  rshift rsft
+  rcontrol rctl
+  roption ralt
+  rcommand rmet
+
+  tap (multi
+    (layer-switch nomods)
+    (on-idle-fakekey to-base tap 20)
+  )
+
+  ;; ENHANCED: Spacebar with UDP tracking
+  spc_udp (tap-hold-release-keys $tap-time $hold-time 
+    (multi spc @tap (cmd echo "keypress:spc" | nc -u 127.0.0.1 6789)) 
+    (layer-toggle f-nav) 
+    ())
+
+  ;; ENHANCED: A key with UDP tracking
+  a_udp (tap-hold-release-keys $a-tap-time $a-hold-time 
+    (multi a @tap (cmd echo "keypress:a" | nc -u 127.0.0.1 6789)) 
+    @shift 
+    $left-hand-keys)
+
+  ;; ENHANCED: S key with UDP tracking
+  s_udp (tap-hold-release-keys $s-tap-time $s-hold-time 
+    (multi s @tap (cmd echo "keypress:s" | nc -u 127.0.0.1 6789)) 
+    @control 
+    $left-hand-keys)
+
+  ;; Regular keys (no UDP yet)
+  d (tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)
+  f (tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)
+  g (tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)
+
+  ;; Right hand home row mods  
+  j (tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)
+  k (tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)
+  l (tap-hold-release-keys $tap-time $hold-time (multi l @tap) @rcontrol $right-hand-keys)
+  ; (tap-hold-release-keys $tap-time $hold-time (multi ; @tap) @rshift $right-hand-keys)
+
+  ;; f-nav layer vim motions
+  fnav_h left
+  fnav_j down
+  fnav_k up
+  fnav_l right
+  fnav_w A-right
+  fnav_u C-A-S-M-u
+  
+  ;; navfast layer with existing UDP notifications
+  fast_h (multi M-left (cmd echo "navkey:h" | nc -u 127.0.0.1 6789))
+  fast_j (multi pgdn (cmd echo "navkey:j" | nc -u 127.0.0.1 6789))
+  fast_k (multi pgup (cmd echo "navkey:k" | nc -u 127.0.0.1 6789))
+  fast_l (multi M-right (cmd echo "navkey:l" | nc -u 127.0.0.1 6789))
+  fast_w A-right
+  fast_u C-A-S-M-u
+) 

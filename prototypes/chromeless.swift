@@ -1,3 +1,22 @@
+/*
+ * ⚠️  PROTOTYPE - DEPRECATED - DO NOT USE FOR DEVELOPMENT ⚠️
+ * 
+ * This file is a historical prototype that has been SUPERSEDED by the modular
+ * implementation in the LearnKeys/ directory.
+ * 
+ * STATUS: ARCHIVED FOR REFERENCE ONLY
+ * CREATED: Early development phase
+ * SUPERSEDED BY: LearnKeys/ modular implementation
+ * 
+ * This monolithic prototype (796 lines) has been refactored into a clean,
+ * modular architecture with proper separation of concerns.
+ * 
+ * FOR CURRENT DEVELOPMENT: Use the LearnKeys/ directory
+ * TO RUN THE APP: Use ./run_learnkeys.sh or ./lk
+ * 
+ * DO NOT MODIFY OR USE THIS FILE
+ */
+
 // Commented out all image loading and NSImageView code for pure SwiftUI rendering
 // import Cocoa
 import SwiftUI

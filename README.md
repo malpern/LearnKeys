@@ -1,292 +1,177 @@
-# LearnKeys
+# LearnKeys - Keyboard Layout Visualizer
 
-A real-time keyboard layout visualizer for Kanata configurations.
+A real-time keyboard layout visualizer for Kanata configurations with beautiful animations and layer switching support.
 
-## Running LearnKeys
+![LearnKeys Demo](https://img.shields.io/badge/Platform-macOS-blue) ![Swift](https://img.shields.io/badge/Language-Swift-orange) ![License](https://img.shields.io/badge/License-MIT-green)
 
-### Quick Start (Recommended)
+## ✨ Features
 
-From the project root directory, use the main run script:
+- **Real-time Key Visualization**: See your keystrokes with smooth animations
+- **Layer Support**: Dynamic layer switching with visual feedback  
+- **Home Row Modifiers**: Clear visualization of modifier key states
+- **Beautiful UI**: Modern SwiftUI interface with 3D effects and animations
+- **Kanata Integration**: Live TCP connection to Kanata for real-time updates
+- **Smart Layout**: Shows only relevant keys for each layer
 
-```bash
-# Use the default config.kbd file
-./run_learnkeys.sh
+## 🚀 Quick Start
 
-# Or specify a custom config file
-./run_learnkeys.sh path/to/your/config.kbd
-```
-
-### Alternative: Short Command
-
-For convenience, you can also use the short wrapper:
-
-```bash
-# Use the default config.kbd file
-./lk
-
-# Or specify a custom config file  
-./lk path/to/your/config.kbd
-```
-
-### Manual Build and Run
-
-If you prefer to build and run manually:
-
-```bash
-# Build the application
-cd LearnKeys
-./build.sh
-
-# Run with a config file (from LearnKeys directory)
-./build/LearnKeys ../config.kbd
-```
-
-### Common Errors and Solutions
-
-**Error: `No such file or directory`**
-- **Cause**: Running from wrong directory or using incorrect path
-- **Solution**: Always run from the project root directory using `./run_learnkeys.sh` or `./lk`
-
-**Error: `Config file not found`**
-- **Cause**: Specified config file doesn't exist
-- **Solution**: Check the file path or use `./run_learnkeys.sh` without arguments to use the default `config.kbd`
-
-**Error: `Permission denied`**
-- **Cause**: Scripts don't have execute permissions
-- **Solution**: Run `chmod +x run_learnkeys.sh lk` from the project root
-
-## Features
-
-- Real-time visualization of active keys and modifiers
-- Support for home row modifiers
-- Layer switching visualization  
-- F+D chord support for fast navigation
-- Dynamic display mappings from config comments
-
-## Requirements
-
-- macOS (tested on macOS 14.5+)
+### Prerequisites
+- macOS 14.5+ (tested)
 - Swift compiler
-- Kanata running with TCP server enabled on port 5829
+- Kanata running with TCP server enabled
 
-## Quick Start
+### Installation & Setup
 
-📋 **First time?** Read [`KANATA_CONFIG_GUIDE.md`](KANATA_CONFIG_GUIDE.md) for config best practices and troubleshooting.
+1. **Clone and setup**:
+   ```bash
+   git clone <repository-url>
+   cd chromeless
+   ```
 
-## Setup
+2. **Configure Kanata** - Add TCP server to your kanata config:
+   ```lisp
+   (defcfg
+     process-unmapped-keys yes
+     concurrent-tap-hold yes
+     tcp-server-address 127.0.0.1:5829
+   )
+   ```
 
-### 1. Configure Kanata with TCP Server
+3. **Grant Accessibility Permissions**:
+   - Go to **System Preferences** → **Security & Privacy** → **Privacy** → **Accessibility**
+   - Add your terminal application or the LearnKeys app
 
-Add TCP server configuration to your kanata config file:
+4. **Run LearnKeys**:
+   ```bash
+   # Quick start with default config
+   ./lk
+   
+   # Or specify a custom config
+   ./lk path/to/your/config.kbd
+   ```
 
-```lisp
-(defcfg
-  process-unmapped-keys yes
-  concurrent-tap-hold yes
-  ;; TCP server configuration:
-  tcp-server-address 127.0.0.1:5829
-)
-```
+## 📖 Usage
 
-**Note**: TCP server syntax varies by kanata version. Check your kanata documentation for the correct configuration.
-
-### 2. Grant Accessibility Permissions
-
-LearnKeys needs accessibility permissions to monitor key presses:
-
-1. Go to **System Preferences** → **Security & Privacy** → **Privacy** → **Accessibility**
-2. Click the lock to make changes
-3. Add your terminal application (if running from terminal) or the LearnKeys app
-
-### 3. Run LearnKeys
-
-Compile and run the application with a config file:
-
-```bash
-swift learnkeys.swift config.kbd
-```
-
-Or use the convenient run script:
-
-```bash
-./run_learnkeys.sh [config-file.kbd]
-```
-
-## Usage
-
-### Loading a Configuration
-
-LearnKeys requires a kanata config file as a command line argument:
-
-- `swift learnkeys.swift <config-file.kbd>` - Direct execution
-- `./run_learnkeys.sh [config-file.kbd]` - If no file specified, tries `config.kbd` in current directory
+### Basic Controls
+- **Cmd+Q**: Quit the application
+- **Cmd+W**: Close window (also quits)
+- **Mouse drag**: Move the overlay window
 
 ### Understanding the Display
 
-The interface is designed to show only the keys that matter for the current layer:
-
-#### Base Layer
-- **Animated Letter Row**: Shows A S D F G H J K L ; with smooth scaling animations
-- **Modifier Row**: Displays home row modifiers with proper symbols and 3D effects
-- **Connection Status**: Green/red indicator showing kanata TCP connection
-
-#### Other Layers (e.g., F-Navigation)
-- **Navigation Keys**: Shows only the keys that have mappings in the current layer
-- **Arrow Keys**: Special section for directional navigation with tilt animations
-- **Layer Indicator**: Yellow highlight showing the active layer name
+**Base Layer**: Shows animated letter row (A-S-D-F-G-H-J-K-L-;) with modifier row below
+**Navigation Layers**: Displays only mapped keys with directional arrows
+**Layer Indicator**: Yellow highlight shows active layer name
 
 ### Visual Feedback
+- **Key Press Animation**: Letters scale dramatically when pressed
+- **3D Modifier Effects**: Tilt and blur effects on modifier keys  
+- **Arrow Directional Tilts**: Arrow keys tilt based on direction
+- **Smooth Transitions**: Spring-based animations throughout
 
-- **Key Press Animation**: Letters scale up dramatically when pressed
-- **Modifier Effects**: 3D tilt and blur effects on modifier keys
-- **Arrow Key Tilts**: Directional tilting based on arrow direction
-- **Smooth Transitions**: Spring-based animations for all state changes
+## 🏗️ Project Structure
 
-## Example Config Support
+```
+LearnKeys/                  # Modern modular Swift application
+├── App/                   # Application lifecycle
+├── Models/                # Data structures
+├── Services/              # Business logic (parsing, networking, monitoring)
+├── Views/                 # UI components
+├── Utils/                 # Utilities and extensions
+├── build.sh              # Build script
+└── config.kbd            # Default kanata configuration
 
-LearnKeys supports the key features from your sample config:
+prototypes/                # Archived prototype implementations
+├── chromeless.swift      # Original monolithic prototype (DEPRECATED)
+└── README.md            # Prototype documentation
 
-- **Home Row Modifiers**: `@a` (tap=a, hold=shift) with visual modifier symbols
-- **Layer Keys**: `@f` (tap=f, hold=f-nav layer) with layer switching indication
-- **Navigation Layers**: Shows arrow mappings and vim movements with arrows (←↓↑→)
-- **Transparent Keys**: `_` keys are hidden from display
-- **Multi-expression Parsing**: Properly handles complex multi-line alias definitions
-
-## Configuration Structure
-
-LearnKeys parses these kanata config sections:
-
-- `(defsrc ...)` - Physical key layout
-- `(deflayer name ...)` - Layer definitions  
-- `(defalias ...)` - Key action definitions with tap-hold parsing
-- `(defvar ...)` - Variables (timing, etc.)
-
-### Advanced Parser Features
-
-- **Multi-line Expression Support**: Handles complex nested expressions
-- **Tap-Hold Detection**: Automatically identifies modifier and layer keys
-- **Alias Resolution**: Resolves `@` references to show actual actions
-- **Error Handling**: Graceful degradation for malformed configs
-
-### Parser Limitations
-
-- **Inline Comments**: `;;` comments mid-expression break parsing and cause alias loss
-- **Complex Multi-Actions**: Only simple tap-hold patterns fully supported
-- **Advanced Features**: Chords, sequences, macros not yet supported
-
-📖 **For detailed configuration guidance, parser capabilities, and best practices, see [`KANATA_CONFIG_GUIDE.md`](KANATA_CONFIG_GUIDE.md)**
-
-## Troubleshooting
-
-### "Disconnected" Status
-
-If the app shows "Disconnected":
-
-1. Make sure kanata is running
-2. Verify TCP server is enabled in your config
-3. Test connection: `nc 127.0.0.1 5829`
-
-### Keys Not Highlighting
-
-1. Check accessibility permissions
-2. Make sure your keys are defined in `defsrc`
-3. Verify the app has the correct config loaded
-
-### Config Not Loading
-
-1. Ensure you're providing the correct file path as command line argument
-2. Check file path and permissions
-3. Verify config syntax (balanced parentheses)
-4. **Check for inline comments** - `;;` comments mid-expression break parsing
-5. Look for error messages in terminal - app will quit with error if config is invalid
-
-⚠️ **Critical**: Avoid inline comments in your config! See `KANATA_CONFIG_GUIDE.md` for details.
-
-### Multiple Processes
-
-If Command+Q isn't working:
-
-1. Check for multiple processes: `ps aux | grep learnkeys`
-2. Kill old processes: `kill <PID>`
-3. Relaunch the app
-
-## Testing TCP Connection
-
-Use the included test script:
-
-```bash
-./test_tcp.sh
+docs/                     # Documentation
+├── KANATA_CONFIG_GUIDE.md
+└── MCP_SETUP.md
 ```
 
-This will verify kanata's TCP server is accessible and show layer change messages.
+## 🔧 Development
 
-## Architecture
+### Building Manually
+```bash
+cd LearnKeys
+./build.sh
+./build/LearnKeys config.kbd
+```
 
-- **KanataConfigParser**: Advanced parser with multi-line expression support
-- **KanataTCPClient**: Real-time TCP connection to kanata with JSON message parsing
-- **GlobalKeyMonitor**: System-wide key monitoring with Command+Q handling
-- **KeyCap**: Chromeless-style key visualization with 3D effects and animations
-- **LearnKeysView**: Main dashboard with layer-based key filtering
+### Configuration Support
+LearnKeys parses these kanata sections:
+- `(defsrc ...)` - Physical key layout
+- `(deflayer ...)` - Layer definitions  
+- `(defalias ...)` - Key actions with tap-hold parsing
+- `(defvar ...)` - Variables and timing
 
-## UI Components
+## 📚 Documentation
 
-### KeyCap Component
-- **Styling**: Matches chromeless.swift exactly with gradients and borders
-- **Animations**: 3D transformations and blur effects for modifiers
-- **Arrow Effects**: Directional tilting for arrow keys
-- **State Management**: Active/inactive visual states
+- **[Kanata Configuration Guide](docs/KANATA_CONFIG_GUIDE.md)** - Comprehensive kanata setup and best practices
+- **[MCP Setup Guide](docs/MCP_SETUP.md)** - Screenshot server setup for development tools
+- **[Prototypes](prototypes/README.md)** - Historical prototype implementations
 
-### Layout System
-- **Letter Row**: 10-slot animated letter display (A-;)
-- **Modifier Row**: Home row modifiers with background panels
-- **Arrow Section**: Dedicated arrow key cluster with proper spacing
-- **Layer-Responsive**: Shows different content based on active layer
+## 🐛 Troubleshooting
 
-## Supported Key Types
+### "Disconnected" Status
+1. Ensure kanata is running
+2. Verify TCP server in config: `tcp-server-address 127.0.0.1:5829`
+3. Test connection: `nc 127.0.0.1 5829`
 
-- ✅ Basic keys (letters, numbers, symbols)
-- ✅ Tap-hold modifiers (shift, ctrl, option, command) with visual symbols
-- ✅ Layer toggle/switch keys with layer indicator
-- ✅ Arrow keys and navigation with directional symbols (←↓↑→)
-- ✅ Transparent keys (`_`) with proper hiding
-- ✅ Complex multi-line alias definitions
-- ✅ Page up/down, escape, space with proper symbols (⇞⇟⎋⎵)
+### Keys Not Highlighting  
+1. Check accessibility permissions
+2. Verify keys in `defsrc` section
+3. Confirm config file loaded correctly
 
-## Performance Features
+### Config Parsing Issues
+1. **Avoid inline comments**: `;;` mid-expression breaks parsing
+2. Check balanced parentheses
+3. See [Kanata Configuration Guide](docs/KANATA_CONFIG_GUIDE.md) for best practices
 
-- **Efficient Parsing**: Single-pass config parser with proper tokenization
-- **Real-time Updates**: Instant layer switching via TCP
-- **Smooth Animations**: GPU-accelerated SwiftUI animations
-- **Low Latency**: Direct system key monitoring for immediate feedback
+## 🔮 Future Improvements
 
-## Files
+### Parser Enhancement
+- **[ ] Switch to Official Rust Kanata Parser**: Replace custom Swift parser with official kanata parser to support:
+  - Multi-line configuration formats (prettier, more readable configs)
+  - Full kanata syntax compatibility 
+  - Advanced features like chords, sequences, and complex expressions
+  - Better error reporting and validation
 
-- `learnkeys.swift` - Main application (1258 lines)
-- `chromeless.swift` - Reference implementation for UI styling
-- `config.kbd` - Example kanata configuration with TCP settings
-- `run_learnkeys.sh` - Launch script with config argument handling
-- `test_tcp.sh` - TCP connection test script
-- `KANATA_CONFIG_GUIDE.md` - **Comprehensive guide for writing compatible configs**
-- `README.md` - This documentation
+### Kanata Integration Improvements  
+- **[ ] Submit Feature Request to Kanata**: Request ability to define default UDP server configuration:
+  ```lisp
+  (defcfg
+    udp-server-address 127.0.0.1:6789  ;; Default UDP endpoint
+    udp-notifications yes              ;; Enable UDP notifications
+  )
+  
+  ;; Then simple UDP tracking without repetition:
+  (defalias
+    a (tap-hold-release-keys 200 150 (multi a @tap (udp-notify keypress:a)) @shift)
+    s (tap-hold-release-keys 200 150 (multi s @tap (udp-notify keypress:s)) @control)
+  )
+  ```
+  This would eliminate the need to repeat `(cmd echo "keypress:key" | nc -u 127.0.0.1 6789)` for every key
 
-## Recent Improvements
+### Additional Enhancements
+- **[ ] Real-time Config Reloading**: Hot-reload configuration changes without restart
+- **[ ] Visual Config Editor**: GUI editor for creating and modifying kanata configurations
+- **[ ] Performance Analytics**: Track typing speed, accuracy, and key usage patterns
+- **[ ] Custom Animation Themes**: User-defined color schemes and animation styles
 
-- **Fixed Parser Bug**: Resolved issue where multi-line expressions were combined incorrectly
-- **Enhanced UI**: Implemented exact chromeless.swift styling and animations
-- **Better Process Management**: Proper Command+Q handling and process cleanup
-- **Improved Error Handling**: Clear error messages for missing configs
-- **Layer Detection**: Smart filtering to show only relevant keys per layer
-- **Configuration Guide**: Added comprehensive [`KANATA_CONFIG_GUIDE.md`](KANATA_CONFIG_GUIDE.md) with parser details and best practices
-- **Fixed Key Duplication**: Resolved issue where keys (like space) were shown multiple times in base layer
-- **Dynamic Container Sizing**: Background containers now properly size themselves based on actual key positions and config
+## 🤝 Contributing
 
-## Known Issues
+1. Fork the repository
+2. Create a feature branch
+3. Work in the `LearnKeys/` modular codebase
+4. Add tests for new functionality
+5. Submit a pull request
 
-- **Comment Parsing**: Inline comments (`;;`) break expression parsing and cause alias loss
-- **Advanced Features**: Chords, macros, and complex multi-actions not fully supported yet
+## 📄 License
 
-*See [`KANATA_CONFIG_GUIDE.md`](KANATA_CONFIG_GUIDE.md) for detailed workarounds and future roadmap.*
+MIT License - see LICENSE file for details.
 
 ---
 
-*Note: This application replicates the visual experience of chromeless.swift while adding dynamic kanata config parsing and real-time layer switching. The UI shows only the keys that matter for each layer, creating a clean and focused learning experience.* 
+**Note**: This project evolved from a prototype (`prototypes/chromeless.swift`) into a professional modular architecture. All active development uses the `LearnKeys/` directory structure. 

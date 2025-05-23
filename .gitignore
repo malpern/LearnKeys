@@ -22,6 +22,10 @@ Package.resolved
 *.xcuserdata/
 DerivedData/
 
+# LearnKeys build artifacts
+LearnKeys/build/
+prototypes/chromeless
+
 # macOS
 .DS_Store
 .AppleDouble

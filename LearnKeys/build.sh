@@ -22,6 +22,7 @@ SWIFT_FILES+="Services/KanataConfigParser.swift "
 SWIFT_FILES+="Services/KanataTCPClient.swift "
 SWIFT_FILES+="Services/GlobalKeyMonitor.swift "
 SWIFT_FILES+="Services/GlobalKeyMonitor+Extensions.swift "
+SWIFT_FILES+="Services/UDPKeyTracker.swift "
 
 # Views  
 SWIFT_FILES+="Views/KeyCap.swift "

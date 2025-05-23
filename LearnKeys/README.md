@@ -1,138 +1,209 @@
-# LearnKeys - Modular Swift Project
+# LearnKeys - Development Documentation
 
-A well-architected Swift application for visualizing and learning Kanata keyboard configurations with real-time key monitoring and beautiful animations.
+This directory contains the modular Swift implementation of LearnKeys, a real-time keyboard layout visualizer for Kanata configurations.
 
-## 🏗️ Project Structure
+## 🏗️ Architecture
 
-The project has been refactored from a single large file into a clean, modular architecture following Swift best practices:
+This is a clean, modular Swift application following best practices with proper separation of concerns.
+
+### Directory Structure
 
 ```
 LearnKeys/
-├── Models/                     # Data models and structures
-│   ├── KanataConfig.swift     # Core config models (KanataConfig, KanataAlias)
-│   └── KeyboardLayout.swift   # Layout models (KeyboardRow, KeyboardLayout, TemporaryKeyState)
-├── Services/                  # Business logic and services
-│   ├── KanataConfigParser.swift           # Kanata config file parsing
-│   ├── KanataTCPClient.swift             # TCP communication with Kanata
-│   ├── GlobalKeyMonitor.swift            # Key monitoring and event handling
-│   └── GlobalKeyMonitor+Extensions.swift # Extended key monitoring functionality
-├── Views/                     # SwiftUI views and UI components
-│   ├── KeyCap.swift                      # Individual key rendering component
-│   ├── LearnKeysView.swift              # Main dashboard view
-│   ├── LearnKeysView+Extensions.swift    # View layout methods
-│   └── LearnKeysView+Helpers.swift      # View helper and utility methods
-├── Utils/                     # Utilities and extensions
-│   ├── Extensions.swift       # Color extensions and utility functions
-│   └── KeyCodeMapper.swift    # Key code mapping utilities
-├── App/                       # Application setup and entry point
-│   ├── AppDelegate.swift      # App delegate and window management
+├── App/                        # Application lifecycle
+│   ├── AppDelegate.swift      # Window management and app setup
 │   └── main.swift            # Application entry point
-├── build.sh                  # Build script
-└── README.md                 # This file
+├── Models/                     # Data structures
+│   ├── KanataConfig.swift    # Configuration models
+│   └── KeyboardLayout.swift  # Layout and visual state models
+├── Services/                   # Business logic
+│   ├── KanataConfigParser.swift      # Config file parsing
+│   ├── KanataTCPClient.swift        # Network communication
+│   ├── GlobalKeyMonitor.swift      # Key monitoring core
+│   └── GlobalKeyMonitor+Extensions.swift # Extended monitoring
+├── Views/                      # UI components
+│   ├── KeyCap.swift          # Individual key rendering
+│   ├── LearnKeysView.swift   # Main view structure
+│   ├── LearnKeysView+Extensions.swift   # Layout methods
+│   └── LearnKeysView+Helpers.swift     # Utility methods
+├── Utils/                      # Utilities and extensions
+│   ├── Extensions.swift      # Color utilities and helpers
+│   └── KeyCodeMapper.swift   # Key code mapping
+├── build/                      # Build output
+│   └── LearnKeys             # Compiled executable
+├── build.sh                   # Build script
+├── config.kbd                 # Default kanata configuration
+└── README.md                  # This file
 ```
 
-## 🚀 Building and Running
+## 🔧 Building and Development
 
-### Build the Project
+### Prerequisites
+- macOS 14.5+
+- Swift compiler (comes with Xcode or Command Line Tools)
+- Kanata with TCP server support
 
+### Building
 ```bash
+# From the LearnKeys directory
+./build.sh
+
+# Run with a config file
+./build/LearnKeys config.kbd
+```
+
+### Development Workflow
+```bash
+# From project root - this is the main way to build and run
+./lk [config-file.kbd]
+
+# For development in LearnKeys directory
 cd LearnKeys
 ./build.sh
+./build/LearnKeys config.kbd
 ```
 
-This will compile all Swift files in the correct order and create an executable at `build/LearnKeys`.
+## 📋 Component Responsibilities
 
-### Run the Application
+### Models/
+- **KanataConfig.swift**: Core data structures for configuration parsing
+- **KeyboardLayout.swift**: Visual state management and layout definitions
 
+### Services/
+- **KanataConfigParser.swift**: Advanced multi-line expression parser for kanata configs
+- **KanataTCPClient.swift**: Real-time TCP connection to kanata with JSON message handling
+- **GlobalKeyMonitor.swift**: System-wide key monitoring with accessibility integration
+- **GlobalKeyMonitor+Extensions.swift**: Extended monitoring features
+
+### Views/
+- **KeyCap.swift**: Individual key component with 3D animations and styling
+- **LearnKeysView.swift**: Main view coordinator and state management
+- **LearnKeysView+Extensions.swift**: Layout calculations and positioning
+- **LearnKeysView+Helpers.swift**: Utility methods and helper functions
+
+### Utils/
+- **Extensions.swift**: Color utilities, helper extensions for SwiftUI
+- **KeyCodeMapper.swift**: Key code to key name mapping functionality
+
+### App/
+- **AppDelegate.swift**: Window management, menu setup, display positioning
+- **main.swift**: Application entry point with NSApplication configuration
+
+## 🎨 UI Architecture
+
+### Design Principles
+- **Layer-Responsive**: Different layouts for different kanata layers
+- **Animated Feedback**: Spring-based animations for all interactions
+- **Modular Components**: Reusable KeyCap components with configurable styling
+- **3D Effects**: Tilt, blur, and gradient effects for visual polish
+
+### KeyCap Component Features
+- Configurable as modifier key or arrow key
+- 3D tilt animations based on key type and direction
+- Active state with background/border changes
+- Symbol display for modifier keys (⇧⌃⌥⌘)
+- Temporary state support for special effects
+
+### Layout System
+- **Letter Row**: 10-slot animated display for home row (A-;)
+- **Modifier Row**: Background grouped modifier keys with proper spacing
+- **Arrow Section**: Dedicated cluster for navigation keys
+- **Dynamic Filtering**: Shows only relevant keys for active layer
+
+## 🔗 Dependencies
+
+### System Frameworks
+- **SwiftUI**: Modern declarative UI framework
+- **AppKit**: Window management and system integration
+- **Network**: TCP client for kanata communication
+- **CoreGraphics**: Low-level graphics and event monitoring
+
+### External Dependencies
+- **None**: Pure Swift implementation with only system frameworks
+
+## 🧪 Testing
+
+### Manual Testing
 ```bash
-./build/LearnKeys path/to/your/config.kbd
+# Test TCP connection
+nc 127.0.0.1 5829
+
+# Test with different configs
+./lk examples/qwerty.kbd
+./lk examples/colemak.kbd
 ```
 
-Example:
-```bash
-./build/LearnKeys ../config.kbd
-```
+### Configuration Testing
+- Test with various kanata config formats
+- Verify layer switching works correctly
+- Check modifier key highlighting
+- Validate arrow key directional tilts
 
-## 🎯 Features
+## 🚀 Performance Characteristics
 
-### Core Functionality
-- **Real-time Key Visualization**: Live monitoring of key presses with beautiful animations
-- **Layer Support**: Dynamic display of different Kanata layers with smooth transitions
-- **Modifier Key Highlighting**: Visual feedback for modifier keys (Shift, Ctrl, Alt, Cmd)
-- **TCP Integration**: Real-time communication with Kanata via TCP for layer changes
+### Efficient Design
+- **Single-pass parsing**: Config parsed once at startup
+- **Real-time updates**: Instant layer switching via TCP
+- **GPU acceleration**: SwiftUI animations use Core Animation
+- **Low latency**: Direct system key monitoring
 
-### Visual Features
-- **Animated Letter Row**: Home row letters with scaling animations on key press
-- **Smart Key Layout**: Intelligent positioning of keys based on physical layout
-- **Temporary States**: Special visual states for layer keys
-- **Background Grouping**: Visual grouping of related keys with backgrounds
-- **Arrow Key Support**: Special handling and animations for arrow keys
+### Resource Usage
+- Minimal CPU usage when idle
+- Small memory footprint (~10-20MB)
+- No disk I/O during runtime
+- Efficient network handling
 
-### Architecture Benefits
-- **Modular Design**: Clean separation of concerns across Models, Views, Services, and Utils
-- **Maintainable Code**: Each component has a single responsibility
-- **Extensible**: Easy to add new features or modify existing ones
-- **Testable**: Services and utilities can be easily unit tested
-- **Reusable**: Components can be reused across different parts of the app
+## 🛠️ Development Guidelines
 
-## 📦 Dependencies
+### Code Style
+- Follow Swift API Design Guidelines
+- Use clear, descriptive naming
+- Prefer composition over inheritance
+- Keep functions focused and small
 
-The project uses only built-in macOS frameworks:
-- **SwiftUI**: UI framework
-- **AppKit**: macOS application framework  
-- **Network**: TCP networking
-- **CoreGraphics**: Low-level graphics and event handling
-- **Foundation**: Core utilities
+### Architecture Patterns
+- **MVVM-style**: Views observe model state
+- **Service Layer**: Business logic isolated from UI
+- **Dependency Injection**: Services passed to views as needed
+- **Extension-based Organization**: Large files split via extensions
 
-## 🔧 Development
+### Adding Features
 
-### Adding New Features
+1. **New Key Types**: Extend KeyCap component with new styling
+2. **Parser Features**: Modify KanataConfigParser for new syntax
+3. **UI Components**: Add to Views/ with proper separation
+4. **Network Features**: Extend KanataTCPClient for new message types
 
-1. **Models**: Add new data structures to `Models/`
-2. **Services**: Add business logic to `Services/`
-3. **Views**: Add UI components to `Views/`
-4. **Utils**: Add utilities to `Utils/`
+## 📝 Build System
 
-### Key Components
-
-- **KanataConfigParser**: Handles parsing of Kanata configuration files
-- **GlobalKeyMonitor**: Manages global key event monitoring
-- **KanataTCPClient**: Handles TCP communication with Kanata for layer changes
-- **LearnKeysView**: Main UI component with keyboard visualization
-- **KeyCap**: Individual key rendering with animations and state management
+The `build.sh` script handles:
+- Dependency resolution
+- Compilation order
+- Framework linking
+- Output organization
+- Error reporting
 
 ### Build Process
+1. Create build directory
+2. Compile in dependency order: Utils → Models → Services → Views → App
+3. Link required frameworks
+4. Generate executable
 
-The `build.sh` script compiles files in dependency order:
-1. Core utilities and extensions
-2. Data models
-3. Services (parsing, networking, monitoring)
-4. Views (UI components)
-5. App setup and entry point
+## 🔄 Migration from Prototype
 
-## 🎨 Visual Design
+This modular implementation replaced a 796-line monolithic prototype (`prototypes/chromeless.swift`). Key improvements:
 
-The app maintains the original chromeless.swift visual style with:
-- Dark theme with gradient backgrounds
-- Smooth animations and transitions
-- Professional key cap styling
-- Real-time visual feedback
-- Multi-monitor support
+- **Maintainability**: Each file has single responsibility
+- **Testability**: Services can be unit tested in isolation
+- **Extensibility**: Clear extension points for new features
+- **Team Development**: Multiple developers can work simultaneously
 
-## 🚦 Usage Notes
+## 📚 References
 
-- Requires a Kanata configuration file as command line argument
-- Connects to Kanata TCP server on localhost:5829
-- Supports Command+Q and Command+W to quit
-- Displays on secondary monitor if available
+- [Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/)
+- [SwiftUI Documentation](https://developer.apple.com/xcode/swiftui/)
+- [Kanata Configuration Guide](../docs/KANATA_CONFIG_GUIDE.md)
 
-## 🔍 Troubleshooting
+---
 
-- **Build Issues**: Ensure all Swift files are present and `build.sh` is executable
-- **TCP Connection**: Verify Kanata is running with TCP enabled on port 5829
-- **Key Detection**: Check that the app has accessibility permissions in System Preferences
-- **Config Parsing**: Review config file syntax if parsing fails
-
-## 📝 License
-
-This project maintains the same license as the original LearnKeys implementation. 
+For user-facing documentation and quick start guide, see the main [README.md](../README.md). 

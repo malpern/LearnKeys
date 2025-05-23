@@ -7,6 +7,7 @@ struct LearnKeysView: View {
     @StateObject private var configParser = KanataConfigParser()
     @StateObject internal var tcpClient = KanataTCPClient()
     @StateObject internal var keyMonitor = GlobalKeyMonitor()
+    @StateObject internal var udpTracker = UDPKeyTracker()
     
     @State internal var config = KanataConfig()
     
@@ -17,7 +18,15 @@ struct LearnKeysView: View {
     }
     
     var currentLayerKeys: [String] {
-        config.layers[tcpClient.currentLayer] ?? []
+        // Handle layer name mapping: TCP reports "nomods" but we want "navfast" layer definition
+        let effectiveLayerName: String
+        if tcpClient.currentLayer == "nomods" {
+            effectiveLayerName = "navfast" // Use navfast layer definition for nomods
+        } else {
+            effectiveLayerName = tcpClient.currentLayer
+        }
+        
+        return config.layers[effectiveLayerName] ?? config.layers["base"] ?? []
     }
     
     var body: some View {
