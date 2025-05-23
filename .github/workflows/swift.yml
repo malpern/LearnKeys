@@ -22,18 +22,16 @@ jobs:
         swift-version: "5.9"
     
     - name: Make build script executable
-      run: chmod +x LearnKeys/build.sh
+      run: chmod +x build.sh
       
     - name: Build LearnKeys
-      run: |
-        cd LearnKeys
-        ./build.sh
+      run: ./build.sh
     
     - name: Verify build output
       run: |
-        if [ -f "LearnKeys/build/LearnKeys" ]; then
+        if [ -f "build/LearnKeys" ]; then
           echo "✅ Build artifact created successfully"
-          ls -la LearnKeys/build/LearnKeys
+          ls -la build/LearnKeys
         else
           echo "❌ Build artifact not found"
           exit 1
@@ -41,18 +39,16 @@ jobs:
     
     - name: Run basic build tests
       run: |
-        chmod +x LearnKeys/Tests/test_build.sh
-        cd LearnKeys
+        chmod +x Tests/test_build.sh
         Tests/test_build.sh
     
     - name: Run comprehensive logic tests
       run: |
-        chmod +x LearnKeys/Tests/test_logic.sh
-        cd LearnKeys
+        chmod +x Tests/test_logic.sh
         Tests/test_logic.sh
     
     - name: Upload build artifact
       uses: actions/upload-artifact@v3
       with:
         name: LearnKeys-executable
-        path: LearnKeys/build/LearnKeys
+        path: build/LearnKeys
