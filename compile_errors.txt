@@ -1,7 +1,0 @@
-chromeless.swift:549:13: warning: initialization of immutable value 'rightGroupCenter' was never used; consider replacing with assignment to '_' or removing it
-547 |         let rightGroupStart = 6 * (slotWidth + slotSpacing) + slotWidth / 2
-548 |         let rightGroupEnd = 9 * (slotWidth + slotSpacing) + slotWidth / 2
-549 |         let rightGroupCenter = (rightGroupStart + rightGroupEnd) / 2
-    |             `- warning: initialization of immutable value 'rightGroupCenter' was never used; consider replacing with assignment to '_' or removing it
-550 |         let rightBackgroundWidth: CGFloat = (4 * slotWidth) + (3 * slotSpacing) + 90
-551 |         let rightBackgroundCenter = ((6 * (slotWidth + slotSpacing) + slotWidth / 2) + (9 * (slotWidth + slotSpacing) + slotWidth / 2)) / 2

@@ -1,7 +1,0 @@
-./watch.sh: line 6: 40583 Done                    echo chromeless.swift
-     40584 Terminated: 15          | entr -r bash -c '
-  pkill -f ./chromeless || true
-  swiftc -o chromeless chromeless.swift -framework Cocoa && ./chromeless &
-'
-./watch.sh: line 7: syntax error near unexpected token `then'
-./watch.sh: line 7: ` ]; then'
