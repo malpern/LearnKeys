@@ -6,13 +6,15 @@ This guide explains how to write kanata configuration files that work optimally 
 
 1. [What the Parser Currently Understands](#what-the-parser-currently-understands)
 2. [⚠️ Critical Issue: Comment Handling](#️-critical-issue-comment-handling)
-3. [Best Practices for LearnKeys Compatibility](#best-practices-for-learnkeys-compatibility)
-4. [Common Issues and Solutions](#common-issues-and-solutions)
-5. [Parser Implementation Notes](#parser-implementation-notes)
-6. [Recent Fixes](#recent-fixes)
-7. [🔍 Parser Error Reporting & Debugging](#-parser-error-reporting--debugging)
-8. [Future Improvements Roadmap](#future-improvements-roadmap)
-9. [Contributing to Parser Development](#contributing-to-parser-development)
+3. [🅰️ Caps-Word Support](#️-caps-word-support)
+4. [🔄 TCP Layer Monitoring](#-tcp-layer-monitoring)
+5. [Best Practices for LearnKeys Compatibility](#best-practices-for-learnkeys-compatibility)
+6. [Common Issues and Solutions](#common-issues-and-solutions)
+7. [Parser Implementation Notes](#parser-implementation-notes)
+8. [Recent Fixes](#recent-fixes)
+9. [🔍 Parser Error Reporting & Debugging](#-parser-error-reporting--debugging)
+10. [Future Improvements Roadmap](#future-improvements-roadmap)
+11. [Contributing to Parser Development](#contributing-to-parser-development)
 
 ---
 
@@ -77,6 +79,18 @@ f (tap-hold-release-keys 200 150 f (layer-toggle f-nav) ())
 spc (tap-hold-release-keys 200 150 spc (layer-while-held nav) ())
 ```
 
+#### **Caps-Word Actions**
+```lisp
+;; ✅ FULLY SUPPORTED: Caps-word with timing configuration
+esc (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+```
+
+The parser fully supports caps-word functionality:
+- **Visual State**: Shows ⇪ symbol and special light blue styling when active
+- **Timing Extraction**: Automatically extracts tap, hold, and duration timings
+- **Debug Support**: Comprehensive debugging for caps-word activation/deactivation
+- **Real-time Monitoring**: Tracks caps-word state changes via TCP and key monitoring
+
 ### ⚠️ Partially Supported Features
 
 #### **Complex Multi-Actions**
@@ -87,8 +101,11 @@ tap (multi
   (on-idle-fakekey to-base tap 20)
 )
 
-;; ✅ PARSED: But complex hold action simplified
-esc (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+;; ⚠️ PARTIALLY SUPPORTED: Complex sequences not fully visualized
+complex_key (multi 
+  (macro "git status")
+  (layer-toggle dev-tools)
+)
 ```
 
 #### **Variable Substitution**
@@ -299,6 +316,351 @@ These comment features will be added in future parser improvements:
 - **Conditional Comments**: Comments that can be toggled on/off
 - **Annotation Comments**: Metadata comments for parser hints
 
+## 🅰️ Caps-Word Support
+
+LearnKeys provides comprehensive support for kanata's caps-word functionality with real-time visual feedback and debugging capabilities.
+
+### ✅ **Fully Supported Caps-Word Features**
+
+#### **Basic Caps-Word Configuration**
+```lisp
+;; ✅ FULLY SUPPORTED: Standard caps-word setup
+esc (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+```
+
+**What this does:**
+- **Tap ESC**: Normal escape key
+- **Hold ESC (200ms)**: Activates caps-word mode for 2000ms (2 seconds)
+- **Visual Feedback**: Shows ⇪ symbol with light blue gradient when active
+
+#### **Timing Configuration Extraction**
+The parser automatically extracts all timing values:
+
+```lisp
+;; Example configuration with extracted timings:
+esc (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+;;                         ↑   ↑                    ↑
+;;                       tap hold                duration
+```
+
+- **Tap Timeout**: `150ms` - Time before tap becomes hold
+- **Hold Timeout**: `200ms` - Time before hold activates caps-word  
+- **Duration**: `2000ms` - How long caps-word stays active
+
+#### **Visual States**
+Caps-word keys show different visual states:
+
+- **Inactive**: Normal key appearance with ⇪ symbol
+- **Pressed**: Standard pressed key styling
+- **Caps-Word Active**: Special light blue gradient background
+- **Debug Indicators**: ⚠️ or ❌ symbols for parsing issues
+
+#### **Real-Time Monitoring**
+LearnKeys tracks caps-word state through multiple channels:
+
+- **Key Press Detection**: Monitors ESC key press/release timing
+- **TCP Layer Changes**: Receives caps-word state from kanata via TCP
+- **Visual State Sync**: Automatically updates UI when caps-word activates/deactivates
+
+### 🔧 **Caps-Word Configuration Best Practices**
+
+#### **Recommended Timing Values**
+```lisp
+;; ✅ GOOD: Conservative timing for reliable activation
+esc (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+
+;; ✅ GOOD: Faster activation for experienced users
+esc (tap-hold-release-keys 100 150 esc (caps-word 1500) ())
+
+;; ⚠️ CAUTION: Very fast timing may cause accidental activation
+esc (tap-hold-release-keys 50 100 esc (caps-word 1000) ())
+```
+
+#### **Variable-Based Configuration**
+```lisp
+;; ✅ GOOD: Use variables for consistent timing
+(defvar
+  esc-tap-time 150
+  esc-hold-time 200
+  caps-word-duration 2000
+)
+
+(defalias
+  esc (tap-hold-release-keys $esc-tap-time $esc-hold-time esc (caps-word $caps-word-duration) ())
+)
+```
+
+#### **Multiple Caps-Word Keys**
+```lisp
+;; ✅ SUPPORTED: Multiple keys can trigger caps-word
+(defalias
+  esc (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+  caps (tap-hold-release-keys 150 200 caps (caps-word 2000) ())
+)
+```
+
+### 🐛 **Caps-Word Debugging**
+
+#### **Debug Output Examples**
+When caps-word is configured, you'll see detailed debug output:
+
+```bash
+# Configuration parsing
+DEBUG: 🕒 Found caps-word alias 'esc' with definition: '(tap-hold-release-keys 150 200 esc (caps-word 2000) ())'
+DEBUG: 🕒 ✅ Created caps-word config: tap=150ms, hold=200ms, duration=2000ms, key='esc'
+
+# Key press monitoring  
+DEBUG: handleCapsWordKeyDown called with key: 'esc'
+DEBUG: Registered caps-word keys: ["esc"]
+DEBUG: ✅ Caps-word key 'esc' pressed, starting hold detection
+
+# Activation/deactivation
+DEBUG: ✅ CAPS-WORD VISUAL ACTIVATED from key 'esc' - hold timeout reached!
+DEBUG: 🅰 CAPS-WORD VISUAL MODE ACTIVATED
+DEBUG: 🕒 2000ms timer expired - auto-deactivating caps-word visual
+DEBUG: 🅰 CAPS-WORD VISUAL MODE DEACTIVATED
+```
+
+#### **Manual Testing Commands**
+LearnKeys includes built-in testing for caps-word:
+
+```bash
+# Test caps-word activation (Command+T)
+🧪 MANUAL TEST: Activating caps-word visual for testing
+
+# Quick test (Command+E)  
+🧪 QUICK TEST: Command+E pressed - testing caps-word visual
+```
+
+#### **Common Debug Patterns**
+```bash
+# Key not registered for caps-word
+DEBUG: ❌ Key 'a' not registered for caps-word
+
+# Caps-word config not found
+DEBUG: 🕒 ❌ No caps-word config found in parsed config
+
+# Timing validation
+DEBUG: 🕒 Using hold timeout: 100ms (reduced from 200ms for testing)
+```
+
+### ⚠️ **Caps-Word Troubleshooting**
+
+#### **Issue: Caps-Word Not Activating**
+```lisp
+;; ❌ PROBLEM: Key not in defsrc
+(defsrc q w e r ...)  ;; Missing 'esc'
+
+;; ✅ SOLUTION: Add caps-word key to defsrc
+(defsrc q w e r ... esc)
+```
+
+#### **Issue: Timing Too Sensitive**
+```lisp
+;; ❌ PROBLEM: Accidental activation
+esc (tap-hold-release-keys 50 100 esc (caps-word 2000) ())
+
+;; ✅ SOLUTION: Increase hold timeout
+esc (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+```
+
+#### **Issue: Visual Not Showing**
+```bash
+# Check if caps-word config was parsed
+swift learnkeys.swift config.kbd 2>&1 | grep "caps-word config"
+
+# Check for parsing errors
+swift learnkeys.swift config.kbd 2>&1 | grep "🕒"
+```
+
+#### **Issue: Duration Too Short/Long**
+```lisp
+;; ❌ PROBLEM: Caps-word deactivates too quickly
+esc (tap-hold-release-keys 150 200 esc (caps-word 500) ())
+
+;; ✅ SOLUTION: Increase duration
+esc (tap-hold-release-keys 150 200 esc (caps-word 3000) ())
+```
+
+### 🚀 **Advanced Caps-Word Features**
+
+#### **Integration with Layer Switching**
+```lisp
+;; ✅ SUPPORTED: Caps-word works with layer changes
+(defalias
+  esc (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+  spc (tap-hold-release-keys 200 150 spc (layer-while-held nav) ())
+)
+```
+
+#### **TCP State Monitoring**
+LearnKeys monitors caps-word state via TCP connection:
+```bash
+[TCP] 🅰 Caps-word related message detected!
+[TCP] 🅰 Caps-word key found: state = active
+```
+
+#### **Error Recovery**
+If caps-word parsing fails, LearnKeys provides fallbacks:
+- Shows physical key name with ⚠️ symbol
+- Logs detailed error information for debugging
+- Continues to function for other keys
+
+### 📋 **Caps-Word Configuration Checklist**
+
+- [ ] **Key in defsrc**: Ensure caps-word key is listed in `(defsrc ...)`
+- [ ] **Proper syntax**: Use `(caps-word duration)` format
+- [ ] **Reasonable timing**: Test tap/hold timeouts for your typing style
+- [ ] **Duration testing**: Verify caps-word duration meets your needs
+- [ ] **Debug verification**: Check parser output for successful configuration
+- [ ] **Visual confirmation**: Test that caps-word visual state activates correctly
+
+## 🔄 TCP Layer Monitoring
+
+LearnKeys includes real-time TCP monitoring to track layer changes and state updates from kanata, providing live synchronization between your configuration and the visual display.
+
+### ✅ **TCP Monitoring Features**
+
+#### **Real-Time Layer Changes**
+LearnKeys connects to kanata via TCP to receive live layer change notifications:
+
+```bash
+# Example TCP messages received from kanata
+[TCP] Raw message: {"LayerChange":{"new":"base"}}
+[TCP] Layer changed to: base
+
+[TCP] Raw message: {"LayerChange":{"new":"nomods"}}
+[TCP] Layer changed to: nomods
+
+[TCP] Raw message: {"LayerChange":{"new":"navfast"}}
+[TCP] Layer changed to: navfast
+```
+
+#### **Automatic Layer Synchronization**
+- **Live Updates**: Layer changes in kanata immediately update the LearnKeys display
+- **State Tracking**: Current layer is tracked and displayed in real-time
+- **Visual Feedback**: Active layer keys are highlighted when their layer is active
+
+#### **TCP Connection Management**
+```bash
+# Connection status monitoring
+[TCP] Connected to kanata on port 1337
+[TCP] Connection established successfully
+[TCP] Monitoring layer changes...
+
+# Error handling
+[TCP] Connection failed - retrying...
+[TCP] TCP timeout - attempting reconnection
+```
+
+### 🔧 **TCP Configuration**
+
+#### **Default TCP Settings**
+LearnKeys uses these default TCP settings to connect to kanata:
+- **Host**: `localhost` (127.0.0.1)
+- **Port**: `1337` (kanata's default TCP port)
+- **Auto-reconnect**: Enabled with exponential backoff
+- **Message parsing**: JSON-based layer change detection
+
+#### **Kanata TCP Setup**
+To enable TCP monitoring in kanata, add this to your configuration:
+
+```lisp
+;; Enable TCP server for LearnKeys integration
+(defcfg
+  process-unmapped-keys yes
+  tcp-server 1337
+)
+```
+
+### 🐛 **TCP Debugging**
+
+#### **TCP Debug Output**
+Monitor TCP connection and messages:
+
+```bash
+# Monitor all TCP activity
+swift learnkeys.swift config.kbd 2>&1 | grep "\[TCP\]"
+
+# Track layer changes specifically
+swift learnkeys.swift config.kbd 2>&1 | grep "Layer changed"
+
+# Monitor raw TCP messages
+swift learnkeys.swift config.kbd 2>&1 | grep "Raw message"
+
+# Check connection status
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(Connected|Connection|TCP.*error)"
+```
+
+#### **Common TCP Debug Patterns**
+```bash
+# Successful layer change
+[TCP] Raw message: {"LayerChange":{"new":"f-nav"}}
+[TCP] Layer changed to: f-nav
+
+# Non-layer messages (filtered out)
+[TCP] 🔍 Non-layer message detected: {"KeyPress":{"key":"a"}}
+
+# Caps-word detection attempts
+[TCP] 🅰 Caps-word related message detected!
+[TCP] 🅰 Caps-word key found: state = active
+```
+
+### ⚠️ **TCP Troubleshooting**
+
+#### **Issue: No TCP Connection**
+```bash
+# Check if kanata TCP server is enabled
+# Add to your kanata config:
+(defcfg tcp-server 1337)
+
+# Verify kanata is running with TCP enabled
+ps aux | grep kanata
+netstat -an | grep 1337
+```
+
+#### **Issue: Layer Changes Not Detected**
+```bash
+# Check TCP message format
+swift learnkeys.swift config.kbd 2>&1 | grep "Raw message"
+
+# Verify layer names match your config
+swift learnkeys.swift config.kbd 2>&1 | grep "Layer changed"
+```
+
+#### **Issue: Connection Drops**
+```bash
+# Monitor connection stability
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(timeout|reconnect|failed)"
+
+# Check for network issues
+lsof -i :1337
+```
+
+### 🚀 **Advanced TCP Features**
+
+#### **Message Type Detection**
+LearnKeys can detect various message types from kanata:
+- **Layer Changes**: Primary focus for visual updates
+- **Key Events**: Monitored but not currently used for display
+- **State Changes**: Including caps-word and other mode changes
+- **Error Messages**: Logged for debugging purposes
+
+#### **Future TCP Enhancements**
+- **Bidirectional Communication**: Send commands back to kanata
+- **Configuration Sync**: Automatically reload config when kanata restarts
+- **Performance Metrics**: Track kanata performance via TCP
+- **Custom Message Types**: Support for user-defined state messages
+
+### 📋 **TCP Setup Checklist**
+
+- [ ] **Kanata TCP enabled**: Add `tcp-server 1337` to kanata config
+- [ ] **Port available**: Ensure port 1337 is not blocked
+- [ ] **Kanata running**: Verify kanata is active and listening
+- [ ] **Connection verified**: Check LearnKeys debug output for TCP messages
+- [ ] **Layer changes working**: Test layer switching and verify TCP updates
+- [ ] **Error handling**: Monitor for connection drops and reconnection attempts
+
 ## Best Practices for LearnKeys Compatibility
 
 ### 1. **Clear Alias Naming**
@@ -480,6 +842,66 @@ Every config load shows a detailed summary:
 =======================
 ```
 
+#### **Advanced Debug Output Categories**
+
+**🕒 Caps-Word Debugging**
+```bash
+# Configuration parsing
+DEBUG: 🕒 Found caps-word alias 'esc' with definition: '(tap-hold-release-keys 150 200 esc (caps-word 2000) ())'
+DEBUG: 🕒 ✅ Created caps-word config: tap=150ms, hold=200ms, duration=2000ms, key='esc'
+
+# Real-time key monitoring
+DEBUG: handleCapsWordKeyDown called with key: 'esc'
+DEBUG: Registered caps-word keys: ["esc"]
+DEBUG: ✅ Caps-word key 'esc' pressed, starting hold detection
+
+# State changes
+DEBUG: ✅ CAPS-WORD VISUAL ACTIVATED from key 'esc' - hold timeout reached!
+DEBUG: 🅰 CAPS-WORD VISUAL MODE ACTIVATED
+DEBUG: 🕒 2000ms timer expired - auto-deactivating caps-word visual
+DEBUG: 🅰 CAPS-WORD VISUAL MODE DEACTIVATED
+```
+
+**🔄 Layer Change Monitoring**
+```bash
+# TCP layer changes from kanata
+[TCP] Raw message: {"LayerChange":{"new":"nomods"}}
+[TCP] Layer changed to: nomods
+[TCP] Raw message: {"LayerChange":{"new":"base"}}
+[TCP] Layer changed to: base
+[TCP] Raw message: {"LayerChange":{"new":"navfast"}}
+[TCP] Layer changed to: navfast
+```
+
+**⌨️ Key Event Tracking**
+```bash
+# Individual key press/release events
+DEBUG: Key down detected: 'd' (keycode: 2)
+DEBUG: Key up detected: 'd' (keycode: 2)
+DEBUG: Key down detected: 'spc' (keycode: 49)
+DEBUG: Key up detected: 'spc' (keycode: 49)
+
+# Modifier key detection
+DEBUG: handleModifierChange keyCode: 55, flags: CGEventFlags(rawValue: 1048840)
+DEBUG: Found physical key 'g' for system keycode 55
+DEBUG: Modifier 'command' for key 'g' is active
+DEBUG: ✅ Activated modifier 'command' and key 'g'
+```
+
+**🔍 Alias Parsing Details**
+```bash
+# Alias creation and validation
+DEBUG: Adding alias 'a' -> '(tap-hold-release-keys 200 150 a lsft ())'
+DEBUG: Parsed tap action: 'a' hold action: 'lsft'
+DEBUG: Total aliases loaded: 42
+
+# FNAV alias debugging
+DEBUG: FNAV alias 'fnav_h' -> 'left'
+DEBUG: FNAV alias 'fnav_j' -> 'down'
+DEBUG: FNAV alias 'fnav_k' -> 'up'
+DEBUG: FNAV alias 'fnav_l' -> 'right'
+```
+
 #### **Display Validation System**
 Prevents broken UI elements like "(TAP-HO..." through active validation:
 
@@ -488,7 +910,9 @@ Prevents broken UI elements like "(TAP-HO..." through active validation:
 - **Fallback System**: Uses tap actions or physical keys when parsing fails
 - **Error Symbols**: Shows ⚠️ or ❌ symbols for problematic keys
 
-#### **Debug Commands**
+#### **Enhanced Debug Commands**
+
+**Basic Debugging**
 ```bash
 # Full parsing summary with errors/warnings
 swift learnkeys.swift config.kbd
@@ -498,10 +922,74 @@ swift learnkeys.swift config.kbd 2>&1 | grep -E "(⚠️|❌|===)"
 
 # Detailed parser debug information
 swift learnkeys.swift config.kbd 2>&1 | grep DEBUG
+```
 
-# Monitor specific alias parsing
+**Caps-Word Specific Debugging**
+```bash
+# Monitor caps-word configuration parsing
+swift learnkeys.swift config.kbd 2>&1 | grep "🕒"
+
+# Track caps-word key registration
+swift learnkeys.swift config.kbd 2>&1 | grep "Registered caps-word"
+
+# Monitor caps-word activation/deactivation
+swift learnkeys.swift config.kbd 2>&1 | grep "🅰"
+
+# Check caps-word timing configuration
+swift learnkeys.swift config.kbd 2>&1 | grep "caps-word config"
+```
+
+**Layer and Key Monitoring**
+```bash
+# Monitor layer changes via TCP
+swift learnkeys.swift config.kbd 2>&1 | grep "\[TCP\]"
+
+# Track specific key events
+swift learnkeys.swift config.kbd 2>&1 | grep "Key.*detected"
+
+# Monitor modifier key activation
+swift learnkeys.swift config.kbd 2>&1 | grep "Modifier.*active"
+
+# Track alias parsing for specific keys
 swift learnkeys.swift config.kbd 2>&1 | grep "Adding alias"
 ```
+
+**Advanced Debugging Patterns**
+```bash
+# Monitor FNAV navigation aliases specifically
+swift learnkeys.swift config.kbd 2>&1 | grep "FNAV alias"
+
+# Check for unhandled key events
+swift learnkeys.swift config.kbd 2>&1 | grep "UNHANDLED KEY"
+
+# Monitor system keycode mappings
+swift learnkeys.swift config.kbd 2>&1 | grep "System keycode mapping"
+
+# Track timing validation
+swift learnkeys.swift config.kbd 2>&1 | grep "Using.*timeout"
+```
+
+#### **Interactive Testing Features**
+
+**Built-in Test Commands**
+```bash
+# Manual caps-word testing (Command+T while app is running)
+🧪 MANUAL TEST: Activating caps-word visual for testing
+
+# Quick caps-word test (Command+E while app is running)  
+🧪 QUICK TEST: Command+E pressed - testing caps-word visual
+
+# Force keycode summary logging
+🔍 MANUAL KEYCODE SUMMARY REQUEST:
+```
+
+**Real-time State Monitoring**
+LearnKeys provides live monitoring of:
+- Active keys and modifiers
+- Layer state changes
+- Caps-word activation status
+- TCP connection status
+- Key event processing
 
 #### **Error Categories**
 
@@ -509,23 +997,58 @@ swift learnkeys.swift config.kbd 2>&1 | grep "Adding alias"
 - Failed to parse tap/hold actions in tap-hold expressions
 - Insufficient tokens in expressions  
 - Missing required alias definitions
+- TCP connection failures
+- Caps-word configuration parsing errors
 
 **🟡 WARNINGS (may affect display):**
-- Unsupported hold actions (caps-word, custom macros, etc.)
+- Unsupported hold actions (custom macros, complex sequences)
 - Complex multi-actions not fully parsed
 - Suspiciously few aliases (likely comment parsing issues)
 - Duplicate alias definitions
+- Missing keys in defsrc that are referenced in layers
 
 **🟢 DISPLAY FALLBACKS:**
 - Shows physical key + ❌ when parsing completely fails
 - Shows tap action + ⚠️ when hold action unsupported
 - Shows "?" for empty/missing definitions
+- Uses fallback symbols for unrecognized keys
+
+#### **Debug Output Filtering**
+
+**Focus on Specific Issues**
+```bash
+# Only caps-word related debug output
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(🕒|🅰|caps-word)"
+
+# Only parsing errors and warnings
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(❌|⚠️|ERROR|WARNING)"
+
+# Only layer and key events
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(\[TCP\]|Key.*detected|Layer.*changed)"
+
+# Only alias parsing
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(Adding alias|FNAV alias|Total aliases)"
+```
+
+**Performance Monitoring**
+```bash
+# Monitor parsing performance
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(Parsing.*took|Total.*loaded)"
+
+# Track memory usage patterns
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(Memory|Cache|Buffer)"
+
+# Monitor TCP connection health
+swift learnkeys.swift config.kbd 2>&1 | grep -E "(TCP.*connected|TCP.*error|TCP.*timeout)"
+```
 
 ### Future Error Detection Features
 - **Layer validation**: Check for undefined layer references
 - **Key conflict detection**: Identify overlapping key mappings  
 - **Timing validation**: Verify tap-hold timing values
 - **Dependency analysis**: Check for missing alias references
+- **Performance profiling**: Track parsing and rendering performance
+- **Configuration linting**: Real-time syntax and logic validation
 
 ---
 

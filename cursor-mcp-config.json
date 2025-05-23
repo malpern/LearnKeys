@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "screenshot": {
+      "command": "python",
+      "args": ["screenshotMCP.py"],
+      "cwd": "/Volumes/FlashGordon/Dropbox/code/chromeless",
+      "env": {
+        "PATH": "/Volumes/FlashGordon/Dropbox/code/chromeless/venv/bin:/usr/bin:/bin"
+      }
+    }
+  }
+} 

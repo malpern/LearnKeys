@@ -1,82 +1,73 @@
-# LearnKeys - Dynamic Kanata Dashboard
+# LearnKeys
 
-LearnKeys is a SwiftUI application that creates a real-time visual dashboard for your kanata keyboard configuration. It parses your kanata config file and displays your key mappings dynamically, updating in real-time as you switch between layers.
+A real-time keyboard layout visualizer for Kanata configurations.
+
+## Running LearnKeys
+
+### Quick Start (Recommended)
+
+From the project root directory, use the main run script:
+
+```bash
+# Use the default config.kbd file
+./run_learnkeys.sh
+
+# Or specify a custom config file
+./run_learnkeys.sh path/to/your/config.kbd
+```
+
+### Alternative: Short Command
+
+For convenience, you can also use the short wrapper:
+
+```bash
+# Use the default config.kbd file
+./lk
+
+# Or specify a custom config file  
+./lk path/to/your/config.kbd
+```
+
+### Manual Build and Run
+
+If you prefer to build and run manually:
+
+```bash
+# Build the application
+cd LearnKeys
+./build.sh
+
+# Run with a config file (from LearnKeys directory)
+./build/LearnKeys ../config.kbd
+```
+
+### Common Errors and Solutions
+
+**Error: `No such file or directory`**
+- **Cause**: Running from wrong directory or using incorrect path
+- **Solution**: Always run from the project root directory using `./run_learnkeys.sh` or `./lk`
+
+**Error: `Config file not found`**
+- **Cause**: Specified config file doesn't exist
+- **Solution**: Check the file path or use `./run_learnkeys.sh` without arguments to use the default `config.kbd`
+
+**Error: `Permission denied`**
+- **Cause**: Scripts don't have execute permissions
+- **Solution**: Run `chmod +x run_learnkeys.sh lk` from the project root
 
 ## Features
 
-### Core Functionality
-- **Real-time Layer Tracking**: Connects to kanata's TCP server to show current active layer
-- **Dynamic Key Mapping Display**: Shows tap/hold actions for each key based on your config
-- **Visual Key Press Feedback**: Highlights keys as you press them with smooth animations
-- **Command Line Interface**: Takes config file as argument, no GUI file loading
-- **Second Monitor Support**: Automatically displays on secondary monitor if available
-- **Quick Exit**: Command+Q or Command+W to quit
-- **Process Management**: Handles multiple instances gracefully
-
-### Visual Experience
-- **Chromeless-Style UI**: Beautiful animated interface inspired by the chromeless.swift design
-- **Animated Letter Row**: Large animated letters that scale and transform when pressed
-- **3D Key Transformations**: Modifier keys tilt and blur when active
-- **Arrow Key Effects**: Directional tilt animations for arrow keys
-- **Layer-Based Display**: Shows only relevant keys for the current layer
-- **Modern Styling**: Gradients, shadows, and smooth spring animations
-
-### Keyboard Support
-- **Home Row Modifiers**: Full support for tap-hold modifier keys
-- **Layer Keys**: Visual indication of layer switching keys
-- **Navigation Layers**: Arrow keys and vim-style navigation
-- **Transparent Keys**: Proper handling of passthrough keys
-- **Modifier Key Display**: Shows modifier symbols (⇧⌃⌥⌘☰) with proper mapping
-
-## Why Dynamic Configuration?
-
-### Advantages Over Hard-Coded Solutions
-
-Unlike static SwiftUI implementations that require manual coding of each key mapping, LearnKeys offers significant advantages through its dynamic configuration approach:
-
-#### 🔄 **Automatic Adaptation**
-- **No Recompilation**: Change your kanata config and the visualization updates instantly
-- **Zero Code Changes**: Works with any kanata configuration without modifying Swift code
-- **Future-Proof**: Automatically supports new layouts, layers, and key mappings as you evolve your setup
-
-#### 🎯 **Perfect Accuracy**
-- **Source of Truth**: Shows exactly what your kanata config defines, eliminating discrepancies
-- **Real-Time Sync**: Connects to kanata's TCP server to display the actual current layer
-- **No Manual Maintenance**: Key mappings stay synchronized automatically with your config changes
-
-#### 🛠️ **Ease of Use**
-- **No Programming Required**: Update your keyboard layout without touching Swift code
-- **Multiple Configs**: Switch between different configuration files for work, gaming, etc.
-- **Command Line Flexibility**: Drop in any `.kbd` file as an argument
-
-#### 🎨 **Dynamic Layout Intelligence**
-- **Layer-Aware Display**: Shows only relevant keys for each layer, reducing visual clutter
-- **Smart Key Detection**: Automatically identifies tap-hold modifiers, layer keys, and navigation mappings
-- **Transparent Key Handling**: Hides passthrough keys (`_`) automatically
-
-#### 🔧 **Configuration Flexibility**
-- **Complex Parsing**: Handles multi-line expressions, nested aliases, and advanced kanata features
-- **Any Layout Support**: Works with QWERTY, Dvorak, Colemak, or any custom layout
-- **Modifier Combinations**: Automatically detects and displays complex modifier arrangements
-
-#### 📈 **Scalability**
-- **Large Configs**: Efficiently parses configs with dozens of layers and hundreds of key mappings
-- **Performance**: Real-time updates without performance degradation
-- **Memory Efficient**: Only loads and displays active layer information
-
-**Example**: With a hard-coded solution, adding a new layer with vim navigation would require:
-1. Writing new Swift code for each key mapping
-2. Manually coding the layer switching logic  
-3. Recompiling and testing the application
-4. Maintaining two separate configurations (kanata + SwiftUI)
-
-With LearnKeys, you simply add the layer to your kanata config and it appears automatically with full functionality.
+- Real-time visualization of active keys and modifiers
+- Support for home row modifiers
+- Layer switching visualization  
+- F+D chord support for fast navigation
+- Dynamic display mappings from config comments
 
 ## Requirements
 
-- macOS (SwiftUI application)
-- kanata running with TCP server enabled
-- Accessibility permissions for key monitoring
+- macOS (tested on macOS 14.5+)
+- Swift compiler
+- Kanata running with TCP server enabled on port 5829
 
 ## Quick Start
 

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Simple wrapper script for LearnKeys
+# This can be placed in your PATH or used directly
+# Usage: ./lk [config-file.kbd]
+
+# Find the script directory (where this wrapper is located)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Run the main script
+exec "$SCRIPT_DIR/run_learnkeys.sh" "$@" 
