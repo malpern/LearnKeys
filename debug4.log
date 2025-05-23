@@ -1,0 +1,174 @@
+[DEBUG] keyAtPosition: a not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: s not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: d not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: f not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: g not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: h not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: j not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: k not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: l not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: ; not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: a not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: s not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: d not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: f not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: g not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: h not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: j not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: k not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: l not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: ; not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: f not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: spc not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: a not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: s not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: d not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: f not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: g not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: h not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: j not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: k not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: l not found in defsrc or out of bounds
+[DEBUG] keyAtPosition: ; not found in defsrc or out of bounds
+[DEBUG] parseExpression: Original defalias expression length: 1603
+[DEBUG] parseExpression: Cleaned defalias expression length: 1142
+[DEBUG] parseExpression: Original contains fnav_j: true
+[DEBUG] parseExpression: Cleaned contains fnav_j: false
+[DEBUG] parseAliases: Processing 43 tokens
+[DEBUG] parseAliases: All tokens: ["defalias", "shift", "lsft", "control", "lctl", "option", "lalt", "command", "lmet", "rshift", "rsft", "rcontrol", "rctl", "roption", "ralt", "rcommand", "rmet", "tap", "(multi (layer-switch nomods) (on-idle-fakekey to-base tap 20) )", "esc", "(tap-hold-release-keys 150 200 esc (caps-word 2000) ())", "spc", "(tap-hold-release-keys $tap-time $hold-time (multi spc @tap) (layer-toggle f-nav) ())", "a", "(tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap) @shift $left-hand-keys)", "s", "(tap-hold-release-keys $tap-time $hold-time (multi s @tap) @control $left-hand-keys)", "d", "(tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)", "f", "(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)", "g", "(tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)", "j", "(tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)", "k", "(tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)", "l", "(tap-hold-release-keys $tap-time $hold-time (multi l @tap) @rcontrol $right-hand-keys)", ";", "(tap-hold-release-keys $tap-time $hold-time (multi ; @tap) @rshift $right-hand-keys)", "fnav_h", "left"]
+[DEBUG] parseAliases: index=1, name='shift', definition='lsft'
+[DEBUG] parseAliases: Simple alias, advancing from index 1 to 3
+[DEBUG] parseAliases: Added alias 'shift' -> 'lsft'
+[DEBUG] parseAliases: index=3, name='control', definition='lctl'
+[DEBUG] parseAliases: Simple alias, advancing from index 3 to 5
+[DEBUG] parseAliases: Added alias 'control' -> 'lctl'
+[DEBUG] parseAliases: index=5, name='option', definition='lalt'
+[DEBUG] parseAliases: Simple alias, advancing from index 5 to 7
+[DEBUG] parseAliases: Added alias 'option' -> 'lalt'
+[DEBUG] parseAliases: index=7, name='command', definition='lmet'
+[DEBUG] parseAliases: Simple alias, advancing from index 7 to 9
+[DEBUG] parseAliases: Added alias 'command' -> 'lmet'
+[DEBUG] parseAliases: index=9, name='rshift', definition='rsft'
+[DEBUG] parseAliases: Simple alias, advancing from index 9 to 11
+[DEBUG] parseAliases: Added alias 'rshift' -> 'rsft'
+[DEBUG] parseAliases: index=11, name='rcontrol', definition='rctl'
+[DEBUG] parseAliases: Simple alias, advancing from index 11 to 13
+[DEBUG] parseAliases: Added alias 'rcontrol' -> 'rctl'
+[DEBUG] parseAliases: index=13, name='roption', definition='ralt'
+[DEBUG] parseAliases: Simple alias, advancing from index 13 to 15
+[DEBUG] parseAliases: Added alias 'roption' -> 'ralt'
+[DEBUG] parseAliases: index=15, name='rcommand', definition='rmet'
+[DEBUG] parseAliases: Simple alias, advancing from index 15 to 17
+[DEBUG] parseAliases: Added alias 'rcommand' -> 'rmet'
+[DEBUG] parseAliases: index=17, name='tap', definition='(multi (layer-switch nomods) (on-idle-fakekey to-base tap 20) )'
+[DEBUG] parseAliases: Simple alias, advancing from index 17 to 19
+[DEBUG] parseAliases: Added alias 'tap' -> '(multi (layer-switch nomods) (on-idle-fakekey to-base tap 20) )'
+[DEBUG] parseAliases: index=19, name='esc', definition='(tap-hold-release-keys 150 200 esc (caps-word 2000) ())'
+[DEBUG] parseAliases: Simple alias, advancing from index 19 to 21
+[DEBUG] parseAliases: Added alias 'esc' -> '(tap-hold-release-keys 150 200 esc (caps-word 2000) ())'
+[DEBUG] parseAliases: index=21, name='spc', definition='(tap-hold-release-keys $tap-time $hold-time (multi spc @tap) (layer-toggle f-nav) ())'
+[DEBUG] parseAliases: Simple alias, advancing from index 21 to 23
+[DEBUG] parseAliases: Added alias 'spc' -> '(tap-hold-release-keys $tap-time $hold-time (multi spc @tap) (layer-toggle f-nav) ())'
+[DEBUG] parseAliases: index=23, name='a', definition='(tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap) @shift $left-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 23 to 25
+[DEBUG] parseAliases: Added alias 'a' -> '(tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap) @shift $left-hand-keys)'
+[DEBUG] parseAliases: index=25, name='s', definition='(tap-hold-release-keys $tap-time $hold-time (multi s @tap) @control $left-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 25 to 27
+[DEBUG] parseAliases: Added alias 's' -> '(tap-hold-release-keys $tap-time $hold-time (multi s @tap) @control $left-hand-keys)'
+[DEBUG] parseAliases: index=27, name='d', definition='(tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 27 to 29
+[DEBUG] parseAliases: Added alias 'd' -> '(tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)'
+[DEBUG] parseAliases: index=29, name='f', definition='(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 29 to 31
+[DEBUG] parseAliases: Added alias 'f' -> '(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)'
+[DEBUG] parseAliases: index=31, name='g', definition='(tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 31 to 33
+[DEBUG] parseAliases: Added alias 'g' -> '(tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)'
+[DEBUG] parseAliases: index=33, name='j', definition='(tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 33 to 35
+[DEBUG] parseAliases: Added alias 'j' -> '(tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)'
+[DEBUG] parseAliases: index=35, name='k', definition='(tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 35 to 37
+[DEBUG] parseAliases: Added alias 'k' -> '(tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)'
+[DEBUG] parseAliases: index=37, name='l', definition='(tap-hold-release-keys $tap-time $hold-time (multi l @tap) @rcontrol $right-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 37 to 39
+[DEBUG] parseAliases: Added alias 'l' -> '(tap-hold-release-keys $tap-time $hold-time (multi l @tap) @rcontrol $right-hand-keys)'
+[DEBUG] parseAliases: index=39, name=';', definition='(tap-hold-release-keys $tap-time $hold-time (multi ; @tap) @rshift $right-hand-keys)'
+[DEBUG] parseAliases: Simple alias, advancing from index 39 to 41
+[DEBUG] parseAliases: Added alias ';' -> '(tap-hold-release-keys $tap-time $hold-time (multi ; @tap) @rshift $right-hand-keys)'
+[DEBUG] parseAliases: index=41, name='fnav_h', definition='left'
+[DEBUG] parseAliases: Simple alias, advancing from index 41 to 43
+[DEBUG] parseAliases: Added alias 'fnav_h' -> 'left'
+[DEBUG] parseAliases: Finished, processed 21 aliases
+Loaded config 'config.kbd' with 4 layers
+DEBUG: Loaded 21 aliases:
+  ; -> (tap-hold-release-keys $tap-time $hold-time (multi ; @tap) @rshift $right-hand-keys)
+  a -> (tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap) @shift $left-hand-keys)
+  command -> lmet
+  control -> lctl
+  d -> (tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)
+  esc -> (tap-hold-release-keys 150 200 esc (caps-word 2000) ())
+  f -> (tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)
+  fnav_h -> left
+  g -> (tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)
+  j -> (tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)
+  k -> (tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)
+  l -> (tap-hold-release-keys $tap-time $hold-time (multi l @tap) @rcontrol $right-hand-keys)
+  option -> lalt
+  rcommand -> rmet
+  rcontrol -> rctl
+  roption -> ralt
+  rshift -> rsft
+  s -> (tap-hold-release-keys $tap-time $hold-time (multi s @tap) @control $left-hand-keys)
+  shift -> lsft
+  spc -> (tap-hold-release-keys $tap-time $hold-time (multi spc @tap) (layer-toggle f-nav) ())
+  tap -> (multi (layer-switch nomods) (on-idle-fakekey to-base tap 20) )
+DEBUG: Found 1 fnav aliases:
+  fnav_h -> left
+DEBUG: f-nav layer has 33 keys
+  [15] @fnav_h
+  [16] @fnav_j
+  [17] @fnav_k
+  [18] @fnav_l
+  [24] @fnav_b
+[DEBUG] keyAtPosition: a -> layerKey=@a, aliasName=a, alias=(tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap) @shift $left-hand-keys)
+[DEBUG] keyAtPosition: s -> layerKey=@s, aliasName=s, alias=(tap-hold-release-keys $tap-time $hold-time (multi s @tap) @control $left-hand-keys)
+[DEBUG] keyAtPosition: d -> layerKey=@d, aliasName=d, alias=(tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)
+[DEBUG] keyAtPosition: f -> layerKey=@f, aliasName=f, alias=(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)
+[DEBUG] keyAtPosition: g -> layerKey=@g, aliasName=g, alias=(tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)
+[DEBUG] keyAtPosition: j -> layerKey=@j, aliasName=j, alias=(tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)
+[DEBUG] keyAtPosition: k -> layerKey=@k, aliasName=k, alias=(tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)
+[DEBUG] keyAtPosition: l -> layerKey=@l, aliasName=l, alias=(tap-hold-release-keys $tap-time $hold-time (multi l @tap) @rcontrol $right-hand-keys)
+[DEBUG] keyAtPosition: ; -> layerKey=@;, aliasName=;, alias=(tap-hold-release-keys $tap-time $hold-time (multi ; @tap) @rshift $right-hand-keys)
+[DEBUG] keyAtPosition: a -> layerKey=@a, aliasName=a, alias=(tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap) @shift $left-hand-keys)
+[DEBUG] keyAtPosition: s -> layerKey=@s, aliasName=s, alias=(tap-hold-release-keys $tap-time $hold-time (multi s @tap) @control $left-hand-keys)
+[DEBUG] keyAtPosition: d -> layerKey=@d, aliasName=d, alias=(tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)
+[DEBUG] keyAtPosition: f -> layerKey=@f, aliasName=f, alias=(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)
+[DEBUG] keyAtPosition: g -> layerKey=@g, aliasName=g, alias=(tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)
+[DEBUG] keyAtPosition: j -> layerKey=@j, aliasName=j, alias=(tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)
+[DEBUG] keyAtPosition: k -> layerKey=@k, aliasName=k, alias=(tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)
+[DEBUG] keyAtPosition: l -> layerKey=@l, aliasName=l, alias=(tap-hold-release-keys $tap-time $hold-time (multi l @tap) @rcontrol $right-hand-keys)
+[DEBUG] keyAtPosition: ; -> layerKey=@;, aliasName=;, alias=(tap-hold-release-keys $tap-time $hold-time (multi ; @tap) @rshift $right-hand-keys)
+[DEBUG] keyAtPosition: f -> layerKey=@f, aliasName=f, alias=(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)
+[DEBUG] keyAtPosition: spc -> layerKey=@spc, aliasName=spc, alias=(tap-hold-release-keys $tap-time $hold-time (multi spc @tap) (layer-toggle f-nav) ())
+[DEBUG] keyAtPosition: f -> layerKey=@f, aliasName=f, alias=(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)
+[DEBUG] keyAtPosition: spc -> layerKey=@spc, aliasName=spc, alias=(tap-hold-release-keys $tap-time $hold-time (multi spc @tap) (layer-toggle f-nav) ())
+[DEBUG] keyAtPosition: ; -> layerKey=@;, aliasName=;, alias=(tap-hold-release-keys $tap-time $hold-time (multi ; @tap) @rshift $right-hand-keys)
+[DEBUG] keyAtPosition: l -> layerKey=@l, aliasName=l, alias=(tap-hold-release-keys $tap-time $hold-time (multi l @tap) @rcontrol $right-hand-keys)
+[DEBUG] keyAtPosition: k -> layerKey=@k, aliasName=k, alias=(tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)
+[DEBUG] keyAtPosition: j -> layerKey=@j, aliasName=j, alias=(tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)
+[DEBUG] keyAtPosition: g -> layerKey=@g, aliasName=g, alias=(tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)
+[DEBUG] keyAtPosition: f -> layerKey=@f, aliasName=f, alias=(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)
+[DEBUG] keyAtPosition: d -> layerKey=@d, aliasName=d, alias=(tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)
+[DEBUG] keyAtPosition: s -> layerKey=@s, aliasName=s, alias=(tap-hold-release-keys $tap-time $hold-time (multi s @tap) @control $left-hand-keys)
+[DEBUG] keyAtPosition: a -> layerKey=@a, aliasName=a, alias=(tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap) @shift $left-hand-keys)
+[TCP] Connected to kanata
+[TCP] Layer changed to: base
+[DEBUG] keyAtPosition: a -> layerKey=@a, aliasName=a, alias=(tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap) @shift $left-hand-keys)
+[DEBUG] keyAtPosition: s -> layerKey=@s, aliasName=s, alias=(tap-hold-release-keys $tap-time $hold-time (multi s @tap) @control $left-hand-keys)
+[DEBUG] keyAtPosition: d -> layerKey=@d, aliasName=d, alias=(tap-hold-release-keys $tap-time $hold-time (multi d @tap) @option $left-hand-keys)
+[DEBUG] keyAtPosition: f -> layerKey=@f, aliasName=f, alias=(tap-hold-release-keys $tap-time $hold-time (multi f @tap) (layer-toggle f-nav) $left-hand-keys)
+[DEBUG] keyAtPosition: g -> layerKey=@g, aliasName=g, alias=(tap-hold-release-keys $tap-time $hold-time (multi g @tap) @command $left-hand-keys)
+[DEBUG] keyAtPosition: j -> layerKey=@j, aliasName=j, alias=(tap-hold-release-keys $tap-time $hold-time (multi j @tap) @rcommand $right-hand-keys)
+[DEBUG] keyAtPosition: k -> layerKey=@k, aliasName=k, alias=(tap-hold-release-keys $tap-time $hold-time (multi k @tap) @roption $right-hand-keys)
+[DEBUG] k

@@ -31,7 +31,8 @@ struct KeyCap: View {
     let symbol: String?
     let isArrow: Bool
     let isActive: Bool
-    
+    let arrowDirection: String? // "left", "right", "up", "down" for arrow keys
+
     private var keyCapWidth: CGFloat {
         if isArrow {
             return 54
@@ -39,32 +40,40 @@ struct KeyCap: View {
             return 120 // User set width
         }
     }
+
     // Centralized styling properties
     private var modifierLabelFont: Font {
         .system(size: 18, design: .default)
     }
+
     private var modifierLabelColor: Color {
         isActive ? Color(hex: "232323") : Color(hex: "F7F7F7")
     }
+
     private var modifierSymbolFont: Font {
         .system(size: 32, weight: .light, design: .default)
     }
+
     private var modifierSymbolColor: Color {
         isActive ? Color(hex: "232323") : Color(hex: "F7F7F7")
     }
+
     private var modifierLabelPadding: CGFloat { 12 }
     private var modifierSymbolPadding: CGFloat { 12 }
     private var arrowLabelFont: Font {
         .system(size: 28, weight: .bold, design: .default)
     }
+
     private var arrowLabelColor: Color { .black }
     private var arrowLabelShadow: Color { .white.opacity(0.7) }
     private var arrowSymbolFont: Font {
         .system(size: 20, weight: .bold, design: .default)
     }
+
     private var arrowSymbolColor: Color {
         isActive ? .black.opacity(0.8) : .white.opacity(0.8)
     }
+
     private var modifierLabelOpacity: Double { 0.4 }
     var body: some View {
         VStack(alignment: .center, spacing: isArrow ? 0 : 2.2) {
@@ -73,9 +82,9 @@ struct KeyCap: View {
                 if isArrow {
                     Text(symbol)
                         .font(arrowSymbolFont)
-                        .foregroundColor(arrowSymbolColor)
+                        .foregroundColor(isActive ? .white : arrowSymbolColor)
                 } else {
-                Text(symbol)
+                    Text(symbol)
                         .font(modifierSymbolFont)
                         .foregroundColor(modifierSymbolColor)
                         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -87,10 +96,10 @@ struct KeyCap: View {
             if isArrow {
                 Text(label)
                     .font(arrowLabelFont)
-                    .foregroundColor(arrowLabelColor)
+                    .foregroundColor(isActive ? .white : arrowLabelColor)
                     .shadow(color: arrowLabelShadow, radius: 0.2, x: 0, y: 0.2)
             } else {
-            Text(label)
+                Text(label)
                     .font(modifierLabelFont)
                     .foregroundColor(modifierLabelColor)
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -104,11 +113,19 @@ struct KeyCap: View {
         .background(
             Group {
                 if isArrow {
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color(hex: "F9F8F8"), Color(hex: "D0CFCF")]),
-                        startPoint: .top, endPoint: .bottom
-                    )
-                    .opacity(0.7)
+                    if isActive {
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color(white: 0.22), Color(white: 0.13)]),
+                            startPoint: .top, endPoint: .bottom
+                        )
+                        .opacity(0.7)
+                    } else {
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color(hex: "F9F8F8"), Color(hex: "D0CFCF")]),
+                            startPoint: .top, endPoint: .bottom
+                        )
+                        .opacity(0.3)
+                    }
                 } else {
                     if isActive {
                         LinearGradient(
@@ -116,10 +133,10 @@ struct KeyCap: View {
                             startPoint: .top, endPoint: .bottom
                         )
                     } else {
-            LinearGradient(
+                        LinearGradient(
                             gradient: Gradient(colors: [Color(hex: "656565"), Color(hex: "4D4D4E")]),
-                startPoint: .top, endPoint: .bottom
-            )
+                            startPoint: .top, endPoint: .bottom
+                        )
                     }
                 }
             }
@@ -129,7 +146,7 @@ struct KeyCap: View {
             Group {
                 if isArrow {
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(isActive ? Color.black.opacity(0.4) : Color(white: 0.7, opacity: 0.4), lineWidth: 1)
+                        .stroke(isActive ? Color.white.opacity(0.7) : Color.black.opacity(0.4), lineWidth: 1)
                 } else {
                     if isActive {
                         RoundedRectangle(cornerRadius: 10)
@@ -141,7 +158,7 @@ struct KeyCap: View {
                                 lineWidth: 3
                             )
                     } else {
-            RoundedRectangle(cornerRadius: 10)
+                        RoundedRectangle(cornerRadius: 10)
                             .stroke(
                                 LinearGradient(
                                     gradient: Gradient(colors: [Color(hex: "777778"), Color(hex: "5B5B5B")]),
@@ -154,7 +171,66 @@ struct KeyCap: View {
             }
         )
         .cornerRadius(10)
-        .shadow(color: .black.opacity(0.7), radius: 6, x: 0, y: 4)
+        // Modifier key tilt and blur animation
+        .modifier(ModifierKeyTiltBlur(isActive: isActive, isArrow: isArrow))
+        // Arrow key tilt and invert effect
+        .modifier(ArrowKeyTiltInvert(isActive: isActive, isArrow: isArrow, arrowDirection: arrowDirection))
+    }
+}
+
+// Custom view modifier for modifier key tilt and blur
+struct ModifierKeyTiltBlur: ViewModifier {
+    let isActive: Bool
+    let isArrow: Bool
+    func body(content: Content) -> some View {
+        if isArrow {
+            content
+        } else {
+            content
+                .rotation3DEffect(
+                    .degrees(isActive ? 30 : 0),
+                    axis: (x: 1, y: 0, z: 0),
+                    anchor: .center
+                )
+                .blur(radius: isActive ? 2.4 : 0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isActive)
+        }
+    }
+}
+
+// Custom view modifier for arrow key tilt and color invert
+struct ArrowKeyTiltInvert: ViewModifier {
+    let isActive: Bool
+    let isArrow: Bool
+    let arrowDirection: String?
+    func body(content: Content) -> some View {
+        if isArrow {
+            let tilt: Double = isActive ? 30 : 0
+            let axis: (x: CGFloat, y: CGFloat, z: CGFloat)
+            switch arrowDirection {
+            case "left":
+                axis = (x: 0, y: -1, z: 0)
+            case "right":
+                axis = (x: 0, y: 1, z: 0)
+            case "up":
+                axis = (x: 1, y: 0, z: 0)
+            case "down":
+                axis = (x: -1, y: 0, z: 0)
+            default:
+                axis = (x: 1, y: 0, z: 0)
+            }
+            return AnyView(
+                content
+                    .rotation3DEffect(
+                        .degrees(tilt),
+                        axis: axis,
+                        anchor: .center
+                    )
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isActive)
+            )
+        } else {
+            return AnyView(content)
+        }
     }
 }
 
@@ -162,9 +238,8 @@ struct ModifierRow: View {
     let keys: [(String, String?)]
     var body: some View {
         HStack(spacing: 16) {
-            ForEach(keys.indices, id: \.self) { index in
-                let key = keys[index]
-                KeyCap(label: key.0, symbol: key.1, isArrow: false, isActive: false)
+            ForEach(keys, id: \ .0) { key in
+                KeyCap(label: key.0, symbol: key.1, isArrow: false, isActive: false, arrowDirection: nil)
             }
         }
         .padding(.horizontal, 12)
@@ -187,9 +262,9 @@ struct ModifierRow: View {
 struct ArrowRow: View {
     var body: some View {
         HStack(spacing: 24) {
-            KeyCap(label: "←", symbol: nil, isArrow: true, isActive: false)
-            KeyCap(label: "↓", symbol: nil, isArrow: true, isActive: true)
-            KeyCap(label: "→", symbol: nil, isArrow: true, isActive: false)
+            KeyCap(label: "←", symbol: nil, isArrow: true, isActive: false, arrowDirection: "left")
+            KeyCap(label: "↓", symbol: nil, isArrow: true, isActive: true, arrowDirection: "down")
+            KeyCap(label: "→", symbol: nil, isArrow: true, isActive: false, arrowDirection: "right")
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 10)
@@ -210,6 +285,7 @@ struct ArrowRow: View {
 
 // Helper to monitor key events
 import AppKit
+
 struct KeyEventMonitor: NSViewRepresentable {
     var onKeyDown: (NSEvent) -> Void
     var onKeyUp: (NSEvent) -> Void
@@ -231,9 +307,9 @@ struct KeyEventMonitor: NSViewRepresentable {
         return view
     }
 
-    func updateNSView(_ nsView: NSView, context: Context) {}
+    func updateNSView(_: NSView, context _: Context) {}
 
-    func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+    func dismantleNSView(_: NSView, coordinator: Coordinator) {
         if let monitor = coordinator.monitor {
             NSEvent.removeMonitor(monitor)
         }
@@ -252,10 +328,10 @@ struct KeyEventMonitor: NSViewRepresentable {
 class GlobalKeyEventMonitor {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
-    private let mask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
-    private let handler: (CGEventType, CGKeyCode) -> Void
+    private let mask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
+    private let handler: (CGEventType, CGKeyCode, CGEventFlags) -> Void
 
-    init(handler: @escaping (CGEventType, CGKeyCode) -> Void) {
+    init(handler: @escaping (CGEventType, CGKeyCode, CGEventFlags) -> Void) {
         self.handler = handler
         let eventTap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
@@ -266,7 +342,17 @@ class GlobalKeyEventMonitor {
                 guard let refcon = refcon else { return Unmanaged.passUnretained(event) }
                 let monitor = Unmanaged<GlobalKeyEventMonitor>.fromOpaque(refcon).takeUnretainedValue()
                 let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-                monitor.handler(type, CGKeyCode(keyCode))
+                let flags = event.flags
+                
+                // Handle Command+Q to quit the app
+                if type == .keyDown && flags.contains(.maskCommand) && keyCode == 12 { // 'q' key
+                    DispatchQueue.main.async {
+                        NSApp.terminate(nil)
+                    }
+                    return Unmanaged.passUnretained(event)
+                }
+                
+                monitor.handler(type, CGKeyCode(keyCode), flags)
                 return Unmanaged.passUnretained(event)
             },
             userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
@@ -281,6 +367,7 @@ class GlobalKeyEventMonitor {
             }
         }
     }
+
     deinit {
         if let eventTap = eventTap {
             CGEvent.tapEnable(tap: eventTap, enable: false)
@@ -297,6 +384,7 @@ struct ChromelessGuideView: View {
     @State private var activeKeys: Set<String> = []
     @State private var globalMonitor: GlobalKeyEventMonitor? = nil
     @State private var overlayAnimating: [String: Bool] = [:]
+    @State private var lastModifierFlags: CGEventFlags = []
 
     var body: some View {
         GeometryReader { geometry in
@@ -312,16 +400,74 @@ struct ChromelessGuideView: View {
             .background(Color.black.ignoresSafeArea())
         }
         .onAppear {
-            globalMonitor = GlobalKeyEventMonitor { type, keyCode in
-                guard let key = keyIdentifierFromKeyCode(keyCode) else { return }
+            globalMonitor = GlobalKeyEventMonitor { type, keyCode, flags in
+                print("[DEBUG] Event: \(type == .keyDown ? "down" : type == .keyUp ? "up" : type == .flagsChanged ? "flagsChanged" : "other"), keyCode: \(keyCode), flags: \(flags.rawValue)")
+                if type == .flagsChanged {
+                    // Use keyCode to determine left/right modifier
+                    let modMap: [CGKeyCode: (flag: CGEventFlags, name: String, letter: String?)] = [
+                        56: (.maskShift, "shiftL", "a"), 60: (.maskShift, "shiftR", ";"),
+                        59: (.maskControl, "controlL", "s"), 62: (.maskControl, "controlR", "l"),
+                        58: (.maskAlternate, "optionL", "d"), 61: (.maskAlternate, "optionR", "k"),
+                        55: (.maskCommand, "commandL", "g"), 54: (.maskCommand, "commandR", "j")
+                    ]
+                    if let (flag, name, letter) = modMap[keyCode] {
+                        let isDown = flags.contains(flag)
+                        print("[DEBUG] Modifier \(name) \(isDown ? "down" : "up")")
+                        DispatchQueue.main.async {
+                            if isDown {
+                                activeKeys.insert(name)
+                                overlayAnimating[name] = true
+                                if let letter = letter {
+                                    activeKeys.insert(letter)
+                                    overlayAnimating[letter] = true
+                                }
+                            } else {
+                                activeKeys.remove(name)
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    overlayAnimating[name] = false
+                                }
+                                if let letter = letter {
+                                    activeKeys.remove(letter)
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        overlayAnimating[letter] = false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    lastModifierFlags = flags
+                    return
+                }
+                guard let key = keyIdentifierFromKeyCode(keyCode) else {
+                    print("[DEBUG] Unmapped keyCode: \(keyCode)")
+                    return
+                }
+                print("[DEBUG] Mapped key: \(key), type: \(type == .keyDown ? "down" : type == .keyUp ? "up" : "other")")
+                // Arrow key to letter mapping
+                let arrowToLetter: [String: String] = [
+                    "left": "h",
+                    "down": "j",
+                    "right": "l",
+                    "up": "k"
+                ]
                 DispatchQueue.main.async {
                     if type == .keyDown {
                         activeKeys.insert(key)
                         overlayAnimating[key] = true
+                        if let letter = arrowToLetter[key] {
+                            activeKeys.insert(letter)
+                            overlayAnimating[letter] = true
+                        }
                     } else if type == .keyUp {
                         activeKeys.remove(key)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             overlayAnimating[key] = false
+                        }
+                        if let letter = arrowToLetter[key] {
+                            activeKeys.remove(letter)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                overlayAnimating[letter] = false
+                            }
                         }
                     }
                 }
@@ -355,7 +501,7 @@ struct ChromelessGuideView: View {
                         .frame(width: drawWidth, height: overlayFrameHeight)
                         .position(x: CGFloat(index) * (slotWidth + slotSpacing) + slotWidth / 2,
                                   y: overlayFrameHeight / 2)
-                        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isActive)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isActive)
                         .zIndex(2)
                 }
             }
@@ -363,13 +509,11 @@ struct ChromelessGuideView: View {
         .frame(width: totalWidth, height: overlayFrameHeight)
     }
 
-    // Letter row: 10 home row letters, equally spaced, with overlay for animated letters
+    // Letter row: Ten home row letters, equally spaced, with overlay for animated letters
     var letterRow: some View {
         let slotWidth: CGFloat = 64
         let slotSpacing: CGFloat = 64 * 1.2
         let smallFontSize: CGFloat = 60
-        let largeFontSize: CGFloat = 120
-        let overlayScale: CGFloat = 1.25
         let overlayFrameHeight: CGFloat = 160
         let drawWidth: CGFloat = 160 // Large enough for the biggest letter
         let totalWidth = CGFloat(letters.count) * slotWidth + CGFloat(letters.count - 1) * slotSpacing
@@ -377,7 +521,6 @@ struct ChromelessGuideView: View {
             ForEach(letters, id: \.self) { letter in
                 ZStack {
                     GeometryReader { geo in
-                        let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
                         // Only show the small letter if not animating in overlay
                         if overlayAnimating[letter.lowercased()] != true {
                             Text(letter)
@@ -402,19 +545,22 @@ struct ChromelessGuideView: View {
         let slotWidth: CGFloat = 64
         let slotSpacing: CGFloat = 64 * 1.2
         let keyHeight: CGFloat = 72
-        let backgroundWidth: CGFloat = (4 * slotWidth) + (3 * slotSpacing) + 90
+        let leftButtonCount = 5 // Now 5 buttons on the left
+        let backgroundWidth: CGFloat = (CGFloat(leftButtonCount) * slotWidth) + (CGFloat(leftButtonCount - 1) * slotSpacing) + 90
         let backgroundHeight: CGFloat = keyHeight + 24 + 8
         let totalWidth = CGFloat(10) * slotWidth + CGFloat(9) * slotSpacing
         let leftGroupStart = slotWidth / 2
-        let leftGroupEnd = 3 * (slotWidth + slotSpacing) + slotWidth / 2
+        let leftGroupEnd = CGFloat(leftButtonCount - 1) * (slotWidth + slotSpacing) + slotWidth / 2
         let leftGroupCenter = (leftGroupStart + leftGroupEnd) / 2
         let leftBackgroundOffset = leftGroupCenter - (backgroundWidth / 2)
         let rightGroupStart = 6 * (slotWidth + slotSpacing) + slotWidth / 2
         let rightGroupEnd = 9 * (slotWidth + slotSpacing) + slotWidth / 2
         let rightGroupCenter = (rightGroupStart + rightGroupEnd) / 2
-        let rightBackgroundOffset = rightGroupCenter - (backgroundWidth / 2)
+        let rightBackgroundWidth: CGFloat = (4 * slotWidth) + (3 * slotSpacing) + 90
+        let rightBackgroundCenter = ((6 * (slotWidth + slotSpacing) + slotWidth / 2) + (9 * (slotWidth + slotSpacing) + slotWidth / 2)) / 2
+        let rightBackgroundOffset = rightBackgroundCenter - (rightBackgroundWidth / 2)
         return ZStack(alignment: .leading) {
-            // Left group background (A, S, D, F)
+            // Left group background (A, S, D, F, layer)
             ZStack {
                 let fill = RoundedRectangle(cornerRadius: 12)
                     .fill(
@@ -444,20 +590,20 @@ struct ChromelessGuideView: View {
                 fill
                 stroke
             }
-            .frame(width: backgroundWidth, height: backgroundHeight)
+            .frame(width: rightBackgroundWidth, height: backgroundHeight)
             .offset(x: rightBackgroundOffset, y: 0)
             // 10-slot grid of modifier keys (with empty slots under G and H)
             HStack(spacing: slotSpacing) {
-                ZStack { KeyCap(label: "shift", symbol: "⇧", isArrow: false, isActive: activeKeys.contains("shift")) }.frame(width: slotWidth)
-                ZStack { KeyCap(label: "control", symbol: "⌃", isArrow: false, isActive: activeKeys.contains("control")) }.frame(width: slotWidth)
-                ZStack { KeyCap(label: "option", symbol: "⌥", isArrow: false, isActive: activeKeys.contains("option")) }.frame(width: slotWidth)
-                ZStack { KeyCap(label: "command", symbol: "⌘", isArrow: false, isActive: activeKeys.contains("command")) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "shift", symbol: "⇧", isArrow: false, isActive: activeKeys.contains("shiftL"), arrowDirection: nil) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "control", symbol: "⌃", isArrow: false, isActive: activeKeys.contains("controlL"), arrowDirection: nil) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "option", symbol: "⌥", isArrow: false, isActive: activeKeys.contains("optionL"), arrowDirection: nil) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "layer", symbol: "☰", isArrow: false, isActive: activeKeys.contains("f"), arrowDirection: nil) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "command", symbol: "⌘", isArrow: false, isActive: activeKeys.contains("commandL"), arrowDirection: nil) }.frame(width: slotWidth)
                 Spacer().frame(width: slotWidth)
-                Spacer().frame(width: slotWidth)
-                ZStack { KeyCap(label: "command", symbol: "⌘", isArrow: false, isActive: activeKeys.contains("command")) }.frame(width: slotWidth)
-                ZStack { KeyCap(label: "option", symbol: "⌥", isArrow: false, isActive: activeKeys.contains("option")) }.frame(width: slotWidth)
-                ZStack { KeyCap(label: "control", symbol: "⌃", isArrow: false, isActive: activeKeys.contains("control")) }.frame(width: slotWidth)
-                ZStack { KeyCap(label: "shift", symbol: "⇧", isArrow: false, isActive: activeKeys.contains("shift")) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "command", symbol: "⌘", isArrow: false, isActive: activeKeys.contains("commandR"), arrowDirection: nil) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "option", symbol: "⌥", isArrow: false, isActive: activeKeys.contains("optionR"), arrowDirection: nil) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "control", symbol: "⌃", isArrow: false, isActive: activeKeys.contains("controlR"), arrowDirection: nil) }.frame(width: slotWidth)
+                ZStack { KeyCap(label: "shift", symbol: "⇧", isArrow: false, isActive: activeKeys.contains("shiftR"), arrowDirection: nil) }.frame(width: slotWidth)
             }
             .frame(width: totalWidth)
         }
@@ -504,11 +650,11 @@ struct ChromelessGuideView: View {
         let slotWidth: CGFloat = 64
         let slotSpacing: CGFloat = 64 * 1.2
         return HStack(spacing: slotSpacing) {
-            ForEach(0..<5) { _ in Spacer().frame(width: slotWidth) }
-            KeyCap(label: "←", symbol: nil, isArrow: true, isActive: activeKeys.contains("left")).frame(width: slotWidth, height: 54)
-            KeyCap(label: "↓", symbol: nil, isArrow: true, isActive: activeKeys.contains("down")).frame(width: slotWidth, height: 54)
-            KeyCap(label: "→", symbol: nil, isArrow: true, isActive: activeKeys.contains("right")).frame(width: slotWidth, height: 54)
-            KeyCap(label: "↑", symbol: nil, isArrow: true, isActive: activeKeys.contains("up")).frame(width: slotWidth, height: 54)
+            ForEach(0 ..< 5) { _ in Spacer().frame(width: slotWidth) }
+            KeyCap(label: "←", symbol: nil, isArrow: true, isActive: activeKeys.contains("left"), arrowDirection: "left").frame(width: slotWidth, height: 54)
+            KeyCap(label: "↓", symbol: nil, isArrow: true, isActive: activeKeys.contains("down"), arrowDirection: "down").frame(width: slotWidth, height: 54)
+            KeyCap(label: "↑", symbol: nil, isArrow: true, isActive: activeKeys.contains("up"), arrowDirection: "up").frame(width: slotWidth, height: 54)
+            KeyCap(label: "→", symbol: nil, isArrow: true, isActive: activeKeys.contains("right"), arrowDirection: "right").frame(width: slotWidth, height: 54)
             Spacer().frame(width: slotWidth)
         }
     }
@@ -537,10 +683,14 @@ func keyIdentifierFromKeyCode(_ keyCode: CGKeyCode) -> String? {
     case 124: return "right"
     case 125: return "down"
     case 126: return "up"
-    case 56, 60: return "shift"
-    case 59, 62: return "control"
-    case 58, 61: return "option"
-    case 55, 54: return "command"
+    case 56: return "shiftL"
+    case 60: return "shiftR"
+    case 59: return "controlL"
+    case 62: return "controlR"
+    case 58: return "optionL"
+    case 61: return "optionR"
+    case 55: return "commandL"
+    case 54: return "commandR"
     case 0: return "a"
     case 1: return "s"
     case 2: return "d"
@@ -643,4 +793,3 @@ extension Color {
 }
 
 // NOTE: For global key listening, your app must be granted Accessibility permissions in System Preferences > Security & Privacy > Privacy > Accessibility.
-

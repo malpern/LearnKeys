@@ -1,23 +1,7 @@
-chromeless.swift:371:13: warning: immutable value 'largeFontSize' was never used; consider replacing with '_' or removing it
-369 |         let slotSpacing: CGFloat = 64 * 1.2
-370 |         let smallFontSize: CGFloat = 60
-371 |         let largeFontSize: CGFloat = 120
-    |             `- warning: immutable value 'largeFontSize' was never used; consider replacing with '_' or removing it
-372 |         let overlayScale: CGFloat = 1.25
-373 |         let overlayFrameHeight: CGFloat = 160
-
-chromeless.swift:372:13: warning: immutable value 'overlayScale' was never used; consider replacing with '_' or removing it
-370 |         let smallFontSize: CGFloat = 60
-371 |         let largeFontSize: CGFloat = 120
-372 |         let overlayScale: CGFloat = 1.25
-    |             `- warning: immutable value 'overlayScale' was never used; consider replacing with '_' or removing it
-373 |         let overlayFrameHeight: CGFloat = 160
-374 |         let drawWidth: CGFloat = 160 // Large enough for the biggest letter
-
-chromeless.swift:380:29: warning: initialization of immutable value 'center' was never used; consider replacing with assignment to '_' or removing it
-378 |                 ZStack {
-379 |                     GeometryReader { geo in
-380 |                         let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-    |                             `- warning: initialization of immutable value 'center' was never used; consider replacing with assignment to '_' or removing it
-381 |                         // Only show the small letter if not animating in overlay
-382 |                         if overlayAnimating[letter.lowercased()] != true {
+chromeless.swift:549:13: warning: initialization of immutable value 'rightGroupCenter' was never used; consider replacing with assignment to '_' or removing it
+547 |         let rightGroupStart = 6 * (slotWidth + slotSpacing) + slotWidth / 2
+548 |         let rightGroupEnd = 9 * (slotWidth + slotSpacing) + slotWidth / 2
+549 |         let rightGroupCenter = (rightGroupStart + rightGroupEnd) / 2
+    |             `- warning: initialization of immutable value 'rightGroupCenter' was never used; consider replacing with assignment to '_' or removing it
+550 |         let rightBackgroundWidth: CGFloat = (4 * slotWidth) + (3 * slotSpacing) + 90
+551 |         let rightBackgroundCenter = ((6 * (slotWidth + slotSpacing) + slotWidth / 2) + (9 * (slotWidth + slotSpacing) + slotWidth / 2)) / 2
