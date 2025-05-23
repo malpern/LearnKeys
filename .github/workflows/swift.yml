@@ -39,11 +39,17 @@ jobs:
           exit 1
         fi
     
-    - name: Run tests
+    - name: Run basic build tests
       run: |
         chmod +x LearnKeys/Tests/test_build.sh
         cd LearnKeys
         Tests/test_build.sh
+    
+    - name: Run comprehensive logic tests
+      run: |
+        chmod +x LearnKeys/Tests/test_logic.sh
+        cd LearnKeys
+        Tests/test_logic.sh
     
     - name: Upload build artifact
       uses: actions/upload-artifact@v3
