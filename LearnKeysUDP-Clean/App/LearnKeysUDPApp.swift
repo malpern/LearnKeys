@@ -52,6 +52,7 @@ class HeadlessUDPServer {
         }
         
         LogManager.shared.logInit("🔄 Headless mode active - app will run without windows")
+        LogManager.shared.logInit("💡 Kanata runs separately - start it independently")
     }
 }
 
@@ -79,6 +80,7 @@ class DraggableWindow: NSWindow {
 struct LearnKeysUDPApp: App {
     @StateObject private var animationController = AnimationController()
     @StateObject private var layerManager = LayerManager()
+    @StateObject private var kanataManager = KanataManager.shared
     
     // Static property to track headless mode
     private static let isHeadless = CommandLine.arguments.contains("--headless")
@@ -87,6 +89,9 @@ struct LearnKeysUDPApp: App {
         // Start headless mode if requested
         if Self.isHeadless {
             HeadlessUDPServer.shared.start()
+        } else {
+            // GUI mode - Kanata runs independently
+            LogManager.shared.logInit("🚀 Starting GUI mode - Kanata should be launched separately")
         }
     }
     
@@ -108,6 +113,7 @@ struct LearnKeysUDPApp: App {
                 ContentView()
                     .environmentObject(animationController)
                     .environmentObject(layerManager)
+                    .environmentObject(kanataManager)
                     .onAppear {
                         LogManager.shared.logInit("🎯 LearnKeys UDP-First started!")
                         LogManager.shared.logInit("🎯 Architecture: Clean UDP-driven design")
@@ -179,6 +185,7 @@ struct LearnKeysUDPApp: App {
 struct ContentView: View {
     @EnvironmentObject var animationController: AnimationController
     @EnvironmentObject var layerManager: LayerManager
+    @EnvironmentObject var kanataManager: KanataManager
     @State private var config = KanataConfig.defaultQWERTY
     
     var body: some View {
@@ -226,13 +233,30 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                Circle()
-                    .fill(.green)
-                    .frame(width: 12, height: 12)
-                
-                Text("Connected")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                HStack(spacing: 12) {
+                    // UDP Connection Status
+                    Circle()
+                        .fill(.green)
+                        .frame(width: 12, height: 12)
+                    
+                    Text("UDP Connected")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                    
+                    // Separator
+                    Text("•")
+                        .font(.caption)
+                        .foregroundColor(.gray.opacity(0.5))
+                    
+                    // Kanata Status
+                    Circle()
+                        .fill(kanataManager.isKanataRunning ? .green : .red)
+                        .frame(width: 12, height: 12)
+                    
+                    Text("Kanata: \(kanataManager.kanataStatus)")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
             }
         }
         .padding()

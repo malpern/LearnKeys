@@ -6,15 +6,21 @@
 
 ## 🚀 Quick Start
 
+**Two separate processes - start each in its own terminal:**
+
 ```bash
-# Build the application
+# Terminal 1: Start Kanata
+kanata --cfg config.kbd
+
+# Terminal 2: Start LearnKeys (GUI mode)
 cd LearnKeysUDP-Clean
-swift build
+swift build && swift run LearnKeysUDP
+```
 
-# Run with GUI (normal mode)
-.build/arm64-apple-macosx/debug/LearnKeysUDP
-
-# Run headless (for CI/testing - no GUI)
+**For CI/testing (headless mode):**
+```bash
+# Start headless UDP server
+cd LearnKeysUDP-Clean && swift build
 .build/arm64-apple-macosx/debug/LearnKeysUDP --headless
 
 # Test UDP messages (in another terminal)
@@ -29,6 +35,7 @@ A **clean, UDP-first reimplementation** of LearnKeys that:
 
 - ✅ **No accessibility permissions** required
 - ✅ **Single source of truth** - all events via UDP
+- ✅ **Independent processes** - LearnKeys and Kanata run separately
 - ✅ **Real-time animations** for key presses, navigation, and modifiers
 - ✅ **Production-ready** with comprehensive logging and error handling
 - ✅ **Easy testing** via manual UDP messages
@@ -170,7 +177,22 @@ The app includes test buttons for common UDP message types.
 
 ## 🔗 Integration
 
-### With Kanata
+### Separate Process Architecture
+LearnKeys UDP and Kanata run as **independent processes**:
+
+1. **Start Kanata** (in one terminal):
+```bash
+# Example: Start kanata with your config
+kanata --cfg config.kbd
+```
+
+2. **Start LearnKeys UDP** (in another terminal):
+```bash
+cd LearnKeysUDP-Clean
+swift build && swift run LearnKeysUDP
+```
+
+### Kanata Configuration
 Add UDP output to your Kanata configuration:
 ```lisp
 ;; In your .kbd file
@@ -186,6 +208,12 @@ Add UDP output to your Kanata configuration:
   ;; ... other keys
 )
 ```
+
+### Benefits of Separation
+- ✅ **Independent lifecycles** - restart one without affecting the other
+- ✅ **Easier debugging** - isolated processes with separate logs
+- ✅ **Flexible deployment** - run LearnKeys on different machines
+- ✅ **No coupling** - Kanata doesn't need to know about LearnKeys
 
 ### Development
 ```bash

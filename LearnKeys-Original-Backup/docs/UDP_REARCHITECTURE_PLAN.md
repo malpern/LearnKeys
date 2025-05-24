@@ -162,7 +162,15 @@ echo "layer:f-nav" | nc -u -w 1 127.0.0.1 6789
 tail ~/Documents/LearnKeysUDP.log
 ```
 
-### **Integration with Kanata:**
+### **Integration with Kanata (Separate Processes):**
+```bash
+# Terminal 1: Start Kanata
+kanata --cfg config.kbd
+
+# Terminal 2: Start LearnKeys
+cd LearnKeysUDP-Clean && swift run LearnKeysUDP
+```
+
 ```lisp
 ;; Add UDP notifications to your .kbd file
 (tap-hold 200 200 a (cmd "printf 'keypress:a\n' | nc -u -w 1 127.0.0.1 6789"))
@@ -186,3 +194,182 @@ tail ~/Documents/LearnKeysUDP.log
 **The UDP-first rearchitecture has been fully implemented and tested. The system is production-ready with comprehensive CI/CD pipeline, headless testing capability, and complete functional parity with the original application.**
 
 **Key Achievement: Transformed a complex, permission-heavy, multi-source input system into a simple, reliable, permission-free UDP-only architecture with production-grade testing infrastructure.** 
+
+---
+
+## 🔮 **Future Evolution Analysis & Next Steps**
+
+### **🔒 Security & Architecture Improvements**
+
+#### **Current Implementation Analysis**
+```
+CURRENT ARCHITECTURE (FUNCTIONAL BUT IMPROVABLE):
+├── Kanata UDP + cmd approach          ⚠️  Security considerations
+├── Shell command execution per key    ⚠️  Process spawning overhead  
+├── UDP packet delivery               ⚠️  No delivery guarantees
+└── External nc dependency            ⚠️  Additional attack surface
+
+SECURITY IMPLICATIONS:
+├── Shell injection risk               ⚠️  sh -c "echo 'data' | nc..."
+├── Process creation overhead          ⚠️  ~50ms per keypress
+├── Broader attack surface             ⚠️  Shell → nc → UDP stack
+└── danger-enable-cmd requirement      ⚠️  Custom kanata build needed
+```
+
+#### **🏆 Recommended Evolution: Hybrid TCP + Native Approach**
+```
+NEXT-GENERATION ARCHITECTURE:
+├── Kanata TCP Server (Native)         ✅ No shell commands
+├── Swift NSWorkspace (Frontmost App)  ✅ Native macOS APIs
+├── Direct TCP communication           ✅ Guaranteed delivery
+└── Standard kanata builds             ✅ No custom compilation
+
+BENEFITS:
+├── Maximum Security                   ✅ No shell injection risk
+├── Better Performance                 ✅ Direct socket communication
+├── Connection Awareness               ✅ Know if app disconnected
+├── Reliable Delivery                  ✅ TCP guarantees vs UDP
+├── Standard kanata                    ✅ Homebrew compatible
+└── Enhanced App Context               ✅ Frontmost app detection
+```
+
+### **🎯 The Source vs Output Problem**
+
+#### **Critical Insight for LearnKeys**
+```
+WHY KANATA-BASED REPORTING IS ESSENTIAL:
+
+Scenario 1: User presses actual ← key
+├─ Input: ← key
+├─ Kanata: passes through  
+└─ System sees: ← key
+
+Scenario 2: User presses F+H (nav layer)
+├─ Input: F+H 
+├─ Kanata: transforms to ← key
+└─ System sees: ← key (SAME AS SCENARIO 1!)
+
+PROBLEM: CGEventTap only sees OUTPUT, not SOURCE
+SOLUTION: Kanata reports SOURCE events for proper animations
+```
+
+#### **Why Alternative Approaches Won't Work**
+```
+APPROACH COMPARISON FOR LEARNKEYS:
+├── CGEventTap (Native)     ❌ Only sees output, can't distinguish source
+├── Accessibility APIs     ❌ Permission hell, removed for good reason
+├── Kanata Reporting       ✅ ONLY solution that provides source info
+└── Log Parsing            ✅ Alternative kanata-based approach
+
+CONCLUSION: Kanata-based reporting is irreplaceable for LearnKeys use case
+```
+
+### **🚀 Potential Next Steps**
+
+#### **Phase 5: Enhanced Security Migration**
+```
+PRIORITY 1 - SECURITY HARDENING:
+├── 5.1 Migrate to TCP Native          🎯 Eliminate shell commands
+├── 5.2 Remove danger-enable-cmd       🎯 Use standard kanata builds
+├── 5.3 Direct Swift TCP client        🎯 Native networking
+└── 5.4 Verify TCP server support      🎯 Test with Homebrew kanata
+
+IMPLEMENTATION APPROACH:
+├── Test kanata --port functionality   ✅ Verify TCP server works
+├── Create TCP client in Swift         ✅ Replace UDP listener  
+├── Remove all cmd statements          ✅ Pure remapping config
+└── Maintain same message formats      ✅ Preserve existing logic
+```
+
+#### **Phase 6: Enhanced App Context** 
+```
+PRIORITY 2 - FRONTMOST APP DETECTION:
+├── 6.1 Add NSWorkspace monitoring     🎯 Frontmost app detection
+├── 6.2 Correlate with keyboard events 🎯 App-specific animations
+├── 6.3 Enhanced logging context       🎯 "F+H in VSCode" logs
+└── 6.4 App-specific configurations    🎯 Different apps, different displays
+
+HYBRID ARCHITECTURE:
+┌─────────────────┐    ┌──────────────────┐
+│   Kanata TCP    │    │  Swift NSWorkspace│
+│  (Source Keys)  │    │ (Frontmost App)   │
+└─────────┬───────┘    └─────────┬────────┘
+          │                      │
+          │    ┌─────────────────▼────────────────┐
+          └────►     Swift LearnKeys App          │
+               │  Combines: Source Keys + App     │
+               │  Shows: F+H animation in VSCode  │
+               └───────────────────────────────────┘
+```
+
+#### **Phase 7: Advanced Features**
+```
+PRIORITY 3 - ENHANCED FUNCTIONALITY:
+├── 7.1 App-specific key mappings      🎯 Different configs per app
+├── 7.2 Historical usage analytics     🎯 Learning progress tracking
+├── 7.3 Custom animation themes        🎯 Personalized visual feedback
+└── 7.4 Export/sharing capabilities    🎯 Share configurations
+
+ARCHITECTURAL BENEFITS:
+├── Separation of concerns             ✅ Kanata=remapping, Swift=UI+context
+├── Enhanced security posture          ✅ Minimal attack surface
+├── Better performance profile         ✅ Native APIs throughout
+└── Future extensibility              ✅ Easy to add new features
+```
+
+### **⚖️ Migration Decision Framework**
+
+#### **When to Migrate**
+```
+MIGRATE NOW IF:
+├── Security is critical concern       ✅ Production environments
+├── Using standard kanata builds       ✅ Homebrew compatibility needed
+├── Planning app context features      ✅ Frontmost app detection
+└── Long-term maintenance priority     ✅ Reduce complexity
+
+STAY WITH CURRENT IF:
+├── Current solution working well      ✅ No immediate pain points
+├── Migration effort not justified     ✅ Resource constraints
+├── Security risks acceptable          ✅ Controlled environment
+└── No need for app context           ✅ Simple use case
+```
+
+#### **Migration Complexity Assessment**
+```
+EFFORT ESTIMATES:
+├── TCP Migration (Phase 5)           📅 2-3 days development
+├── App Context (Phase 6)             📅 1-2 days development  
+├── Testing & Validation              📅 1-2 days comprehensive testing
+└── Documentation Updates             📅 0.5 days updates
+
+RISK MITIGATION:
+├── Parallel implementation           ✅ Keep current system running
+├── Feature flag approach             ✅ Gradual rollout capability
+├── Comprehensive testing             ✅ Existing CI/CD infrastructure
+└── Rollback capability               ✅ Minimal deployment risk
+```
+
+### **🎯 Recommendation Summary**
+
+#### **Immediate Action Items**
+1. **Verify TCP Support**: Test `kanata --port 5829` with current setup
+2. **Prototype TCP Client**: Simple Swift TCP connection to validate approach  
+3. **Security Assessment**: Evaluate current cmd-based risks for your environment
+4. **Plan Migration**: If proceeding, plan phased approach with rollback capability
+
+#### **Long-term Vision**
+```
+ULTIMATE ARCHITECTURE GOAL:
+├── Zero shell command execution       🎯 Maximum security
+├── Native macOS API integration       🎯 Best performance  
+├── App-aware keyboard visualization   🎯 Enhanced user experience
+├── Standard tool compatibility        🎯 No custom builds
+└── Production-grade reliability       🎯 Enterprise ready
+
+CURRENT STATUS: Functional foundation complete ✅
+NEXT EVOLUTION: Security & context enhancement 🚀
+```
+
+---
+
+**Note**: The current UDP-based implementation provides a solid, working foundation. The above analysis represents potential evolution paths rather than required changes. The decision to migrate should be based on specific security requirements, maintenance priorities, and feature needs. 

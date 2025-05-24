@@ -1,0 +1,205 @@
+;; Advanced Kanata Configuration with Home Row Mods + UDP Tracking
+;;
+;; FUNCTIONALITY OVERVIEW:
+;; ----------------------
+;; 
+;; HOME ROW MODIFIERS:
+;; - Left hand:  A(shift) S(ctrl) D(option) F(vim-nav) G(command)
+;; - Right hand: J(command) K(option) L(ctrl) ;(shift)
+;; - Smart same-hand early activation prevents accidental mod triggers
+;; - Auto-disables during rapid typing for smooth experience
+;;
+;; NAVIGATION LAYERS:
+;; - F (hold): Basic vim navigation with hjkl = arrow keys (←↓↑→) + w word nav
+;; - Spacebar (hold): Same basic vim navigation as F-hold
+;;   * h -> line start (Cmd+←)
+;;   * j -> page down 
+;;   * k -> page up
+;;   * l -> line end (Cmd+→)
+;;   * w -> word right (Option+→)
+;;   * u -> HomeRow App trigger
+;; 
+;; UDP TRACKING:
+;; - All home row mods send keypress:* and modifier:*:down/up notifications
+;; - Navigation keys send navkey:* notifications for animations
+;; - Layer changes send layer:* notifications
+;; - Spacebar sends keypress:spc for animation triggers
+;; 
+;; SPECIAL FEATURES:
+;; - Automatic mod disabling during fast typing sessions
+;; - Configurable timing for different fingers (pinky gets more time)
+;; - Concurrent tap-hold support for advanced chord combinations
+;; - Real-time UDP notification to LearnKeys app for animations
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  ;; Note: To enable TCP server for LearnKeys, you may need to:
+  ;; 1. Check your kanata version for the correct TCP server syntax
+  ;; 2. Add something like: tcp-server-address 127.0.0.1:5829
+  ;; 3. Or start kanata with --tcp-server flag
+  ;; 4. Refer to kanata documentation for your version
+)
+
+(defsrc
+  q w e r t y u i o p a s d f g h j k l ; z x c v b n m spc left down up right
+)
+
+(defvar
+  ;; Note: consider using different time values for your different fingers.
+  ;; For example, your pinkies might be slower to release keys and index
+  ;; fingers faster.
+  tap-time 200
+  hold-time 150
+
+  a-tap-time 300  ;; little more time pinky needs to tap a key
+  a-hold-time 200 ;; little more time pinky needs to hold a key
+
+  s-tap-time 300  ;; little more time for ring finger (same as pinky)
+  s-hold-time 200 ;; little more time for ring finger (same as pinky)
+
+  ;; Chord timing
+  chord-timeout 250
+
+  left-hand-keys (
+    q w e r t
+    a s d f g
+    z x c v b
+  )
+  right-hand-keys (
+    y u i o p
+    h j k l ;
+    n m , . /
+  )
+)
+
+(deflayer base
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g @h @j @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(deflayer nomods
+  q w e r t y u i o p a s d f g h j k l ; z x c v b n m spc _ _ _ _
+)
+
+(deflayer f-nav
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @fnav_h @fnav_j @fnav_k @fnav_l _ _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+(deflayer navfast
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @fast_h @fast_j @fast_k @fast_l _ _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+(deffakekeys
+  to-base (layer-switch base)
+)
+
+(defchordsv2
+  (d f) (layer-while-held navfast) $chord-timeout all-released ()
+)
+
+(defalias
+  ;; Basic modifiers
+  shift lsft
+  control lctl
+  option lalt
+  command lmet
+  rshift rsft
+  rcontrol rctl
+  roption ralt
+  rcommand rmet
+
+  ;; Layer management
+  tap (multi (layer-switch nomods) (on-idle-fakekey to-base tap 20))
+
+  ;; Spacebar with UDP tracking
+  spc (tap-hold-release-keys $tap-time $hold-time (multi spc @tap (cmd sh -c "echo 'keypress:spc' | nc -u 127.0.0.1 6789")) (multi (layer-toggle f-nav) (cmd sh -c "echo 'layer:f-nav' | nc -u 127.0.0.1 6789")) ())
+
+  ;; Left hand home row mods with UDP tracking
+  a (tap-hold-release-keys $a-tap-time $a-hold-time (multi a @tap (cmd sh -c "echo 'keypress:a' | nc -u 127.0.0.1 6789")) (multi @shift (cmd sh -c "echo 'modifier:shift:down' | nc -u 127.0.0.1 6789")) $left-hand-keys)
+  s (tap-hold-release-keys $s-tap-time $s-hold-time (multi s @tap (cmd sh -c "echo 'keypress:s' | nc -u 127.0.0.1 6789")) (multi @control (cmd sh -c "echo 'modifier:control:down' | nc -u 127.0.0.1 6789")) $left-hand-keys)
+  d (tap-hold-release-keys $tap-time $hold-time (multi d @tap (cmd sh -c "echo 'keypress:d' | nc -u 127.0.0.1 6789")) (multi @option (cmd sh -c "echo 'modifier:option:down' | nc -u 127.0.0.1 6789")) $left-hand-keys)
+  f (tap-hold-release-keys $tap-time $hold-time (multi f @tap (cmd sh -c "echo 'keypress:f' | nc -u 127.0.0.1 6789")) (multi (layer-toggle f-nav) (cmd sh -c "echo 'layer:f-nav' | nc -u 127.0.0.1 6789")) $left-hand-keys)
+  g (tap-hold-release-keys $tap-time $hold-time (multi g @tap (cmd sh -c "echo 'keypress:g' | nc -u 127.0.0.1 6789")) (multi @command (cmd sh -c "echo 'modifier:command:down' | nc -u 127.0.0.1 6789")) $left-hand-keys)
+
+  ;; Right hand home row mods with UDP tracking
+  j (tap-hold-release-keys $tap-time $hold-time (multi j @tap (cmd sh -c "echo 'keypress:j' | nc -u 127.0.0.1 6789")) (multi @rcommand (cmd sh -c "echo 'modifier:command:down' | nc -u 127.0.0.1 6789")) $right-hand-keys)
+  k (tap-hold-release-keys $tap-time $hold-time (multi k @tap (cmd sh -c "echo 'keypress:k' | nc -u 127.0.0.1 6789")) (multi @roption (cmd sh -c "echo 'modifier:option:down' | nc -u 127.0.0.1 6789")) $right-hand-keys)
+  l (tap-hold-release-keys $tap-time $hold-time (multi l @tap (cmd sh -c "echo 'keypress:l' | nc -u 127.0.0.1 6789")) (multi @rcontrol (cmd sh -c "echo 'modifier:control:down' | nc -u 127.0.0.1 6789")) $right-hand-keys)
+  ; (tap-hold-release-keys $tap-time $hold-time (multi ; @tap (cmd sh -c "echo 'keypress:semicolon' | nc -u 127.0.0.1 6789")) (multi @rshift (cmd sh -c "echo 'modifier:shift:down' | nc -u 127.0.0.1 6789")) $right-hand-keys)
+
+  ;; Regular keys with UDP tracking
+  q (multi q (cmd sh -c "echo 'keypress:q' | nc -u 127.0.0.1 6789"))
+  w (multi w (cmd sh -c "echo 'keypress:w' | nc -u 127.0.0.1 6789"))
+  e (multi e (cmd sh -c "echo 'keypress:e' | nc -u 127.0.0.1 6789"))
+  r (multi r (cmd sh -c "echo 'keypress:r' | nc -u 127.0.0.1 6789"))
+  t (multi t (cmd sh -c "echo 'keypress:t' | nc -u 127.0.0.1 6789"))
+  y (multi y (cmd sh -c "echo 'keypress:y' | nc -u 127.0.0.1 6789"))
+  u (multi u (cmd sh -c "echo 'keypress:u' | nc -u 127.0.0.1 6789"))
+  i (multi i (cmd sh -c "echo 'keypress:i' | nc -u 127.0.0.1 6789"))
+  o (multi o (cmd sh -c "echo 'keypress:o' | nc -u 127.0.0.1 6789"))
+  p (multi p (cmd sh -c "echo 'keypress:p' | nc -u 127.0.0.1 6789"))
+  h (multi h (cmd sh -c "echo 'keypress:h' | nc -u 127.0.0.1 6789"))
+  z (multi z (cmd sh -c "echo 'keypress:z' | nc -u 127.0.0.1 6789"))
+  x (multi x (cmd sh -c "echo 'keypress:x' | nc -u 127.0.0.1 6789"))
+  c (multi c (cmd sh -c "echo 'keypress:c' | nc -u 127.0.0.1 6789"))
+  v (multi v (cmd sh -c "echo 'keypress:v' | nc -u 127.0.0.1 6789"))
+  b (multi b (cmd sh -c "echo 'keypress:b' | nc -u 127.0.0.1 6789"))
+  n (multi n (cmd sh -c "echo 'keypress:n' | nc -u 127.0.0.1 6789"))
+  m (multi m (cmd sh -c "echo 'keypress:m' | nc -u 127.0.0.1 6789"))
+
+  ;; F-nav layer with UDP tracking
+  fnav_h (multi left (cmd sh -c "echo 'navkey:h' | nc -u 127.0.0.1 6789"))
+  fnav_j (multi down (cmd sh -c "echo 'navkey:j' | nc -u 127.0.0.1 6789"))
+  fnav_k (multi up (cmd sh -c "echo 'navkey:k' | nc -u 127.0.0.1 6789"))
+  fnav_l (multi right (cmd sh -c "echo 'navkey:l' | nc -u 127.0.0.1 6789"))
+  fnav_w (multi A-right (cmd sh -c "echo 'navkey:w' | nc -u 127.0.0.1 6789"))
+  fnav_u (multi C-A-S-M-u (cmd sh -c "echo 'navkey:u' | nc -u 127.0.0.1 6789"))
+  
+  ;; Navfast layer with UDP tracking
+  fast_h (multi M-left (cmd sh -c "echo 'navkey:fast_h' | nc -u 127.0.0.1 6789"))
+  fast_j (multi pgdn (cmd sh -c "echo 'navkey:fast_j' | nc -u 127.0.0.1 6789"))
+  fast_k (multi pgup (cmd sh -c "echo 'navkey:fast_k' | nc -u 127.0.0.1 6789"))
+  fast_l (multi M-right (cmd sh -c "echo 'navkey:fast_l' | nc -u 127.0.0.1 6789"))
+  fast_w (multi A-right (cmd sh -c "echo 'navkey:fast_w' | nc -u 127.0.0.1 6789"))
+  fast_u (multi C-A-S-M-u (cmd sh -c "echo 'navkey:fast_u' | nc -u 127.0.0.1 6789"))
+)
+
+;; =============================================================================
+;; LEARNKEYS DISPLAY METADATA (Valid Kanata Comments)
+;; =============================================================================
+;; This section defines how aliases should be displayed in the LearnKeys app.
+;; Format: ;;DISPLAY: alias-name "display-text" "symbol"
+;; The Swift app will parse these comments to get proper display names.
+
+;;DISPLAY: fnav_h "left" "←"
+;;DISPLAY: fnav_j "down" "↓"
+;;DISPLAY: fnav_k "up" "↑"
+;;DISPLAY: fnav_l "right" "→"
+;;DISPLAY: fnav_w "word right" "⇢"
+;;DISPLAY: fnav_u "homerow" "🏠"
+
+;;DISPLAY: fast_h "line start" "⇤"
+;;DISPLAY: fast_j "page down" "⇟"
+;;DISPLAY: fast_k "page up" "⇞"
+;;DISPLAY: fast_l "line end" "⇥"
+;;DISPLAY: fast_w "word right" "⇢"
+;;DISPLAY: fast_u "homerow" "🏠"
+
+;;DISPLAY: left "left" "←"
+;;DISPLAY: right "right" "→"
+;;DISPLAY: up "up" "↑"
+;;DISPLAY: down "down" "↓"
+;;DISPLAY: pgup "page up" "⇞"
+;;DISPLAY: pgdn "page down" "⇟"
+;;DISPLAY: spc "space" "⎵"
+;;DISPLAY: ret "enter" "⏎"
+;;DISPLAY: bspc "backspace" "⌫"
+;;DISPLAY: del "delete" "⌦"
+;;DISPLAY: tab "tab" "⇥"
+
+;;DISPLAY: A-right "word right" "⇢"
+;;DISPLAY: M-left "line start" "⇤"
+;;DISPLAY: M-right "line end" "⇥"
+;;DISPLAY: C-A-S-M-u "homerow" "🏠"
+
