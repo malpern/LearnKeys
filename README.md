@@ -175,3 +175,89 @@ MIT License - see LICENSE file for details.
 ---
 
 **Note**: This project evolved from a prototype (`prototypes/chromeless.swift`) into a professional modular architecture. All active development uses the `LearnKeys/` directory structure. # Test keychain
+
+# LearnKeys UDP-First
+
+A clean, simple rewrite of LearnKeys using a **UDP-first architecture**.
+
+## 🎯 **Key Benefits**
+
+- ✅ **No Accessibility Permissions**: Uses UDP messages from Kanata instead of system key monitoring
+- ✅ **Simple Architecture**: Single source of truth (UDP) drives all animations  
+- ✅ **Reliable**: Direct messages from Kanata, no OS interference
+- ✅ **Easy Testing**: Send UDP messages manually to test any scenario
+- ✅ **Better Performance**: No OS-level key monitoring overhead
+
+## 🏗️ **Architecture**
+
+```
+LearnKeysUDP/
+├── App/                    # Minimal app structure
+├── Core/                   # UDP-driven logic
+│   ├── AnimationController # Single source of truth
+│   └── UDPKeyTracker      # UDP message handling
+├── Views/                  # Simple SwiftUI views
+│   ├── KeyboardView       # Main keyboard display
+│   └── KeyView           # Individual key with animations
+├── Models/                 # Simple data models
+└── Utils/                  # Helper utilities
+```
+
+## 🚀 **How It Works**
+
+1. **Kanata sends UDP messages** for every key event:
+   ```
+   keypress:a              → Key press animation
+   modifier:shift:down     → Modifier state change
+   navkey:h               → Navigation animation
+   layer:f-nav            → Layer transition
+   ```
+
+2. **AnimationController** receives UDP messages and updates state
+3. **SwiftUI Views** automatically react to state changes
+4. **No complex fallback logic** or multiple data sources
+
+## 🧪 **Testing**
+
+The app includes built-in test controls. You can also test manually:
+
+```bash
+# Test key press
+printf "keypress:a\n" | nc -u -w 1 127.0.0.1 6789
+
+# Test modifier
+printf "modifier:shift:down\n" | nc -u -w 1 127.0.0.1 6789
+
+# Test navigation
+printf "navkey:h\n" | nc -u -w 1 127.0.0.1 6789
+```
+
+## 🔧 **Building**
+
+```bash
+swift build
+swift run LearnKeysUDP
+```
+
+## 📋 **Kanata Configuration**
+
+Your Kanata config needs UDP messages for the keys you want to track:
+
+```kanata
+;; Regular key with UDP
+a (multi a (cmd echo "keypress:a" | nc -u 127.0.0.1 6789))
+
+;; Modifier with UDP  
+a (tap-hold-release-keys 200 150 
+  (multi a (cmd echo "keypress:a" | nc -u 127.0.0.1 6789))
+  (multi lsft (cmd echo "modifier:shift:down" | nc -u 127.0.0.1 6789))
+  (a s d f g))
+```
+
+## 🎉 **Result**
+
+A much simpler, more reliable LearnKeys that:
+- Requires no special permissions
+- Has predictable, consistent behavior  
+- Is easy to test and debug
+- Performs better than the complex multi-source original

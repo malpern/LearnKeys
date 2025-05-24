@@ -75,7 +75,7 @@
 )
 
 (deflayer base
-  q w e r t y u i o p @a @s @d @f @g h @j @k @l @; z x c v b n m @spc _ _ _ _
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g @h @j @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
 )
 
 (deflayer nomods
@@ -127,6 +127,26 @@
   k (tap-hold-release-keys $tap-time $hold-time (multi k @tap (cmd echo "keypress:k" | nc -u 127.0.0.1 6789)) (multi @roption (cmd echo "modifier:option:down" | nc -u 127.0.0.1 6789)) $right-hand-keys)
   l (tap-hold-release-keys $tap-time $hold-time (multi l @tap (cmd echo "keypress:l" | nc -u 127.0.0.1 6789)) (multi @rcontrol (cmd echo "modifier:control:down" | nc -u 127.0.0.1 6789)) $right-hand-keys)
   ; (tap-hold-release-keys $tap-time $hold-time (multi ; @tap (cmd echo "keypress:semicolon" | nc -u 127.0.0.1 6789)) (multi @rshift (cmd echo "modifier:shift:down" | nc -u 127.0.0.1 6789)) $right-hand-keys)
+
+  ;; Regular keys with UDP tracking
+  q (multi q (cmd echo "keypress:q" | nc -u 127.0.0.1 6789))
+  w (multi w (cmd echo "keypress:w" | nc -u 127.0.0.1 6789))
+  e (multi e (cmd echo "keypress:e" | nc -u 127.0.0.1 6789))
+  r (multi r (cmd echo "keypress:r" | nc -u 127.0.0.1 6789))
+  t (multi t (cmd echo "keypress:t" | nc -u 127.0.0.1 6789))
+  y (multi y (cmd echo "keypress:y" | nc -u 127.0.0.1 6789))
+  u (multi u (cmd echo "keypress:u" | nc -u 127.0.0.1 6789))
+  i (multi i (cmd echo "keypress:i" | nc -u 127.0.0.1 6789))
+  o (multi o (cmd echo "keypress:o" | nc -u 127.0.0.1 6789))
+  p (multi p (cmd echo "keypress:p" | nc -u 127.0.0.1 6789))
+  h (multi h (cmd echo "keypress:h" | nc -u 127.0.0.1 6789))
+  z (multi z (cmd echo "keypress:z" | nc -u 127.0.0.1 6789))
+  x (multi x (cmd echo "keypress:x" | nc -u 127.0.0.1 6789))
+  c (multi c (cmd echo "keypress:c" | nc -u 127.0.0.1 6789))
+  v (multi v (cmd echo "keypress:v" | nc -u 127.0.0.1 6789))
+  b (multi b (cmd echo "keypress:b" | nc -u 127.0.0.1 6789))
+  n (multi n (cmd echo "keypress:n" | nc -u 127.0.0.1 6789))
+  m (multi m (cmd echo "keypress:m" | nc -u 127.0.0.1 6789))
 
   ;; F-nav layer with UDP tracking
   fnav_h (multi left (cmd echo "navkey:h" | nc -u 127.0.0.1 6789))
