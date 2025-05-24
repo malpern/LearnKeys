@@ -1,180 +1,4 @@
-import Foundation
 import SwiftUI
-import AppKit
-
-// MARK: - Headless UDP Server for CI Testing
-
-class HeadlessUDPServer {
-    static let shared = HeadlessUDPServer()
-    private var udpTracker: UDPKeyTracker?
-    
-    private init() {}
-    
-    func start() {
-        LogManager.shared.logInit("🎯 LearnKeys UDP starting in HEADLESS mode for CI/testing")
-        LogManager.shared.logInit("🎯 No GUI will be created - UDP server only")
-        LogManager.shared.logInit("🎯 Starting headless UDP server...")
-        LogManager.shared.logInit("🎯 UDP Port: 6789")
-        LogManager.shared.logInit("🎯 Supported messages: keypress:*, navkey:*, modifier:*:*, layer:*")
-        
-        // Create headless UDP tracker
-        udpTracker = UDPKeyTracker()
-        
-        // Set up logging callbacks for verification
-        udpTracker?.onKeyPress = { key in
-            LogManager.shared.log("✅ HEADLESS: Key press processed - \(key)")
-        }
-        
-        udpTracker?.onNavigationKey = { key in
-            LogManager.shared.log("✅ HEADLESS: Navigation key processed - \(key)")
-        }
-        
-        udpTracker?.onModifierChange = { modifier, isActive in
-            LogManager.shared.log("✅ HEADLESS: Modifier \(modifier) - \(isActive ? "activated" : "deactivated")")
-        }
-        
-        udpTracker?.onLayerChange = { layer in
-            LogManager.shared.log("✅ HEADLESS: Layer changed to - \(layer)")
-        }
-        
-        LogManager.shared.logInit("✅ Headless UDP server ready - waiting for messages...")
-        LogManager.shared.logInit("💡 Test with: echo 'keypress:a' | nc -u 127.0.0.1 6789")
-        
-        // Set up signal handling for graceful shutdown
-        signal(SIGINT) { _ in
-            LogManager.shared.log("🛑 HEADLESS: Received SIGINT - shutting down gracefully")
-            exit(0)
-        }
-        
-        signal(SIGTERM) { _ in
-            LogManager.shared.log("🛑 HEADLESS: Received SIGTERM - shutting down gracefully")
-            exit(0)
-        }
-        
-        LogManager.shared.logInit("🔄 Headless mode active - app will run without windows")
-    }
-}
-
-// MARK: - Custom Window Class with Drag Support
-
-class DraggableWindow: NSWindow {
-    override func keyDown(with event: NSEvent) {
-        // Command+Q or Command+W to quit
-        if event.modifierFlags.contains(.command) {
-            if event.charactersIgnoringModifiers == "q" || event.charactersIgnoringModifiers == "w" {
-                LogManager.shared.log("🚪 Command+\(event.charactersIgnoringModifiers?.uppercased() ?? "") detected - quitting app")
-                NSApp.terminate(nil)
-                return
-            }
-        }
-        super.keyDown(with: event)
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        performDrag(with: event)
-    }
-}
-
-@main
-struct LearnKeysUDPApp: App {
-    @StateObject private var animationController = AnimationController()
-    @StateObject private var layerManager = LayerManager()
-    
-    // Static property to track headless mode
-    private static let isHeadless = CommandLine.arguments.contains("--headless")
-    
-    init() {
-        // Start headless mode if requested
-        if Self.isHeadless {
-            HeadlessUDPServer.shared.start()
-        }
-    }
-    
-    var body: some Scene {
-        WindowGroup {
-            // In headless mode, create a minimal hidden view
-            if Self.isHeadless {
-                Text("Headless Mode")
-                    .frame(width: 1, height: 1)
-                    .opacity(0)
-                    .onAppear {
-                        // Hide the window immediately in headless mode
-                        DispatchQueue.main.async {
-                            NSApp.windows.first?.orderOut(nil)
-                            NSApp.setActivationPolicy(.prohibited)
-                        }
-                    }
-            } else {
-                ContentView()
-                    .environmentObject(animationController)
-                    .environmentObject(layerManager)
-                    .onAppear {
-                        LogManager.shared.logInit("🎯 LearnKeys UDP-First started!")
-                        LogManager.shared.logInit("🎯 Architecture: Clean UDP-driven design")
-                        LogManager.shared.logInit("🎯 No accessibility permissions needed")
-                        configureWindow()
-                    }
-            }
-        }
-        .windowStyle(.hiddenTitleBar)
-        .windowResizability(.contentSize)
-        .windowToolbarStyle(.unifiedCompact)
-    }
-    
-    private func setupMenuBar() {
-        let mainMenu = NSMenu()
-        let appMenuItem = NSMenuItem()
-        mainMenu.addItem(appMenuItem)
-        
-        let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "Quit LearnKeys", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        appMenu.addItem(withTitle: "Close Window", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "w")
-        appMenuItem.submenu = appMenu
-        NSApp.mainMenu = mainMenu
-    }
-    
-    private func configureWindow() {
-        DispatchQueue.main.async {
-            // Set up menu bar for Command+Q to work
-            self.setupMenuBar()
-            
-            // Configure window properties to match original but with better UX
-            if let window = NSApp.windows.first {
-                // Replace the standard window with our draggable window
-                let currentContentView = window.contentView
-                let currentFrame = window.frame
-                
-                let newWindow = DraggableWindow(
-                    contentRect: currentFrame,
-                    styleMask: [.borderless, .resizable],
-                    backing: .buffered,
-                    defer: false
-                )
-                
-                // Set window properties
-                newWindow.level = .normal  // Changed from .floating to be less intrusive
-                newWindow.isOpaque = true
-                newWindow.backgroundColor = .black
-                newWindow.hasShadow = true  // Changed from false to provide visual feedback
-                newWindow.contentView = currentContentView
-                
-                // Position on secondary monitor (desktop 2) like original
-                let screens = NSScreen.screens
-                let targetScreen = screens.count > 1 ? screens[1] : screens[0] // Use secondary if available, else main
-                let contentRect = targetScreen.frame // Use full screen like original
-                
-                newWindow.setFrame(contentRect, display: true)
-                
-                // Close the old window and show the new one
-                window.close()
-                newWindow.makeKeyAndOrderFront(nil)
-                newWindow.makeFirstResponder(newWindow)
-                
-                LogManager.shared.logInit("🎯 Window configured: draggable, resizable, with shadow")
-            }
-        }
-    }
-}
 
 struct ContentView: View {
     @EnvironmentObject var animationController: AnimationController
@@ -183,7 +7,7 @@ struct ContentView: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            // Header (exact replica of original)
+            // Header (with drag area)
             headerView
             
             // Animated letter row (always shown - signature feature)
@@ -200,42 +24,59 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black)
+        .frame(minWidth: 700, minHeight: 500)
     }
     
     // MARK: - Header (with drag area)
     
     private var headerView: some View {
-        VStack(spacing: 10) {
-            HStack {
-                Text("LearnKeys")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
-                Spacer()
-                
-                Text("config.kbd")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
+        VStack(spacing: 0) {
+            // Subtle drag area indicator
+            Rectangle()
+                .fill(Color.white.opacity(0.1))
+                .frame(height: 4)
+                .overlay(
+                    HStack(spacing: 4) {
+                        ForEach(0..<5) { _ in
+                            Circle()
+                                .fill(Color.white.opacity(0.3))
+                                .frame(width: 4, height: 4)
+                        }
+                    }
+                )
             
-            HStack {
-                Text("Layer: \(animationController.currentLayer)")
-                    .font(.headline)
-                    .foregroundColor(.blue)
+            VStack(spacing: 10) {
+                HStack {
+                    Text("LearnKeys")
+                        .font(.title)
+                    .fontWeight(.bold)
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    Text("config.kbd")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
                 
-                Spacer()
-                
-                Circle()
-                    .fill(.green)
-                    .frame(width: 12, height: 12)
-                
-                Text("Connected")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                HStack {
+                    Text("Layer: \(animationController.currentLayer)")
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                    
+                    Spacer()
+                    
+                    Circle()
+                        .fill(.green)
+                        .frame(width: 12, height: 12)
+                    
+                    Text("Connected")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
             }
+            .padding()
         }
-        .padding()
     }
     
     // MARK: - Animated Letter Row (exact original)

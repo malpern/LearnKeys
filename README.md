@@ -1,13 +1,21 @@
 # LearnKeys UDP-First Implementation
 
-**Status:** ✅ **Phase 1 FULLY VERIFIED** - Production-ready UDP-driven keyboard visualizer
+![Build Status](https://github.com/malpern/LearnKeys/actions/workflows/swift.yml/badge.svg)
+
+**Status:** ✅ **Phase 1 FULLY VERIFIED** - Production-ready UDP-driven keyboard visualizer with CI/CD
 
 ## 🚀 Quick Start
 
 ```bash
-# Run the app (with visible window)
+# Build the application
 cd LearnKeysUDP-Clean
-open .build/arm64-apple-macosx/debug/LearnKeysUDP
+swift build
+
+# Run with GUI (normal mode)
+.build/arm64-apple-macosx/debug/LearnKeysUDP
+
+# Run headless (for CI/testing - no GUI)
+.build/arm64-apple-macosx/debug/LearnKeysUDP --headless
 
 # Test UDP messages (in another terminal)
 printf "keypress:a\n" | nc -u -w 1 127.0.0.1 6789
@@ -83,6 +91,30 @@ LOG_FILE=false swift run LearnKeysUDP
 ```
 
 ## 🧪 Testing
+
+### Headless Mode (CI/Testing)
+Perfect for automated testing and CI environments:
+
+```bash
+# Start headless UDP server (no GUI)
+.build/arm64-apple-macosx/debug/LearnKeysUDP --headless &
+
+# Test all message types
+echo "keypress:a" | nc -u -w 1 127.0.0.1 6789
+echo "navkey:h" | nc -u -w 1 127.0.0.1 6789
+echo "modifier:shift:down" | nc -u -w 1 127.0.0.1 6789
+echo "layer:f-nav" | nc -u -w 1 127.0.0.1 6789
+
+# Check processing in logs
+tail ~/Documents/LearnKeysUDP.log
+```
+
+**Headless Mode Features:**
+- ✅ No GUI dependencies - perfect for CI
+- ✅ Full UDP message processing
+- ✅ Comprehensive logging for verification
+- ✅ All callbacks fire with `HEADLESS:` prefix
+- ✅ Graceful signal handling (SIGINT/SIGTERM)
 
 ### Manual UDP Testing
 ```bash
@@ -163,9 +195,21 @@ swift build
 # Build for release
 swift build --configuration release
 
-# Run tests
-swift test  # (when test suite is added)
+# Run comprehensive test suite
+cd Tests
+./test_udp_functional.sh  # Full UDP functional tests
+./test_build_only.sh      # Build verification only
+
+# Run headless for CI/testing
+.build/arm64-apple-macosx/debug/LearnKeysUDP --headless
 ```
+
+### CI/CD Pipeline
+- ✅ **Automated builds** on every push/PR
+- ✅ **Headless UDP testing** with full functional verification
+- ✅ **Architecture compliance** checks
+- ✅ **Multi-configuration builds** (debug + release)
+- ✅ **Test artifact archiving** with logs
 
 ---
 

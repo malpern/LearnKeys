@@ -73,7 +73,7 @@ open .build/arm64-apple-macosx/debug/LearnKeysUDP  # Shows window properly
 ✅ IMPLEMENTED:
 LearnKeysUDP-Clean/
 ├── App/LearnKeysUDPApp.swift        # ✅ Minimal SwiftUI app
-├── Core/
+├── Corekjljfffa/
 │   ├── UDPKeyTracker.swift          # ✅ Primary UDP input system
 │   ├── AnimationController.swift    # ✅ Single source of truth
 │   └── LayerManager.swift           # ✅ Layer state management

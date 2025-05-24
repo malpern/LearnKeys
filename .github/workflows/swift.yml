@@ -1,54 +1,313 @@
-# This workflow will build the LearnKeys Swift project
+# This workflow builds and tests the LearnKeys UDP-First implementation
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
 
-name: Swift
+name: LearnKeys UDP Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
+
+env:
+  UDP_PORT: 6789
 
 jobs:
-  build:
+  build-and-test:
     runs-on: macos-latest
+    timeout-minutes: 20
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
     
     - name: Set up Swift
       uses: swift-actions/setup-swift@v1
       with:
         swift-version: "5.9"
     
-    - name: Make build script executable
-      run: chmod +x build.sh
-      
-    - name: Build LearnKeys
-      run: ./build.sh
-    
-    - name: Verify build output
+    - name: Install dependencies
       run: |
-        if [ -f "build/LearnKeys" ]; then
-          echo "✅ Build artifact created successfully"
-          ls -la build/LearnKeys
+        # Ensure netcat and lsof are available (should be on macOS by default)
+        which nc || (echo "❌ netcat not found" && exit 1)
+        which lsof || (echo "❌ lsof not found" && exit 1)
+        echo "✅ All required tools available"
+    
+    - name: Build LearnKeys UDP
+      run: |
+        cd LearnKeysUDP-Clean
+        echo "🔨 Building LearnKeysUDP..."
+        swift build --configuration release
+        
+        # Verify build artifact was created
+        if [ -f ".build/arm64-apple-macosx/release/LearnKeysUDP" ]; then
+          echo "✅ Release build artifact created successfully"
+          ls -la .build/arm64-apple-macosx/release/LearnKeysUDP
         else
-          echo "❌ Build artifact not found"
+          echo "❌ Release build artifact not found"
+          exit 1
+        fi
+        
+        # Also create debug build for testing
+        swift build --configuration debug
+        
+        if [ -f ".build/arm64-apple-macosx/debug/LearnKeysUDP" ]; then
+          echo "✅ Debug build artifact created successfully"
+          ls -la .build/arm64-apple-macosx/debug/LearnKeysUDP
+        else
+          echo "❌ Debug build artifact not found"
           exit 1
         fi
     
-    - name: Run basic build tests
+    - name: Run build verification tests
       run: |
-        chmod +x Tests/test_build.sh
+        cd LearnKeysUDP-Clean
+        chmod +x Tests/*.sh
+        echo "🧪 Running build verification..."
         Tests/test_build.sh
     
-    - name: Run comprehensive logic tests
+    - name: Run unit logic tests
       run: |
-        chmod +x Tests/test_logic.sh
+        cd LearnKeysUDP-Clean
+        echo "🧪 Running logic tests..."
         Tests/test_logic.sh
     
-    - name: Upload build artifact
+    - name: Run UDP functional tests (headless)
+      run: |
+        cd LearnKeysUDP-Clean
+        echo "🧪 Running UDP functional tests in headless mode..."
+        
+        # Start the application in headless mode for CI
+        echo "🚀 Starting LearnKeysUDP in headless mode..."
+        .build/arm64-apple-macosx/debug/LearnKeysUDP --headless &
+        APP_PID=$!
+        
+        # Wait for UDP port to be available
+        timeout=30
+        counter=0
+        echo "⏳ Waiting for UDP port $UDP_PORT to be available..."
+        while [ $counter -lt $timeout ]; do
+          if lsof -i :$UDP_PORT >/dev/null 2>&1; then
+            echo "✅ UDP port $UDP_PORT is listening"
+            break
+          fi
+          counter=$((counter + 1))
+          sleep 1
+          echo -n "."
+        done
+        
+        if [ $counter -eq $timeout ]; then
+          echo "❌ UDP port $UDP_PORT not available after $timeout seconds"
+          kill $APP_PID 2>/dev/null || true
+          exit 1
+        fi
+        
+        # Give it a moment to fully initialize
+        sleep 3
+        
+        echo ""
+        echo "🧪 Testing UDP message processing..."
+        
+        # Test keypress messages
+        echo "📝 Testing keypress messages..."
+        echo "keypress:a" | nc -u -w 1 127.0.0.1 $UDP_PORT
+        echo "keypress:s" | nc -u -w 1 127.0.0.1 $UDP_PORT
+        sleep 1
+        
+        # Test navigation messages
+        echo "🧭 Testing navigation messages..."
+        echo "navkey:h" | nc -u -w 1 127.0.0.1 $UDP_PORT
+        echo "navkey:j" | nc -u -w 1 127.0.0.1 $UDP_PORT
+        sleep 1
+        
+        # Test modifier messages
+        echo "🎛️ Testing modifier messages..."
+        echo "modifier:shift:down" | nc -u -w 1 127.0.0.1 $UDP_PORT
+        echo "modifier:shift:up" | nc -u -w 1 127.0.0.1 $UDP_PORT
+        sleep 1
+        
+        # Test layer messages
+        echo "🗂️ Testing layer messages..."
+        echo "layer:f-nav" | nc -u -w 1 127.0.0.1 $UDP_PORT
+        echo "layer:base" | nc -u -w 1 127.0.0.1 $UDP_PORT
+        sleep 1
+        
+        # Check log file for expected messages
+        echo ""
+        echo "📋 Verifying log output..."
+        if [ -f "$HOME/Documents/LearnKeysUDP.log" ]; then
+          # Check for headless mode activation
+          if grep -q "HEADLESS mode for CI/testing" "$HOME/Documents/LearnKeysUDP.log"; then
+            echo "✅ Headless mode activated correctly"
+          else
+            echo "❌ Headless mode not detected in logs"
+            exit 1
+          fi
+          
+          # Check for message processing
+          if grep -q "HEADLESS: Key press processed" "$HOME/Documents/LearnKeysUDP.log"; then
+            echo "✅ Key press messages processed"
+          else
+            echo "❌ Key press messages not processed"
+            exit 1
+          fi
+          
+          if grep -q "HEADLESS: Navigation key processed" "$HOME/Documents/LearnKeysUDP.log"; then
+            echo "✅ Navigation messages processed"
+          else
+            echo "❌ Navigation messages not processed"
+            exit 1
+          fi
+          
+          if grep -q "HEADLESS: Modifier.*activated" "$HOME/Documents/LearnKeysUDP.log"; then
+            echo "✅ Modifier messages processed"
+          else
+            echo "❌ Modifier messages not processed"
+            exit 1
+          fi
+          
+          if grep -q "HEADLESS: Layer changed" "$HOME/Documents/LearnKeysUDP.log"; then
+            echo "✅ Layer messages processed"
+          else
+            echo "❌ Layer messages not processed"
+            exit 1
+          fi
+          
+          echo "📊 Recent log entries:"
+          tail -10 "$HOME/Documents/LearnKeysUDP.log"
+        else
+          echo "❌ Log file not found: $HOME/Documents/LearnKeysUDP.log"
+          exit 1
+        fi
+        
+        # Cleanup
+        echo ""
+        echo "🧹 Stopping application..."
+        kill $APP_PID 2>/dev/null || true
+        wait $APP_PID 2>/dev/null || true
+        
+        echo "✅ UDP functional tests passed!"
+    
+    - name: Run comprehensive tests (root directory)
+      run: |
+        chmod +x Tests/*.sh
+        echo "🧪 Running comprehensive test suite..."
+        
+        # Run build-only test from root
+        Tests/test_build_only.sh
+        
+        # Test comprehensive script in auto mode
+        Tests/test_udp_comprehensive.sh --auto
+    
+    - name: Archive test logs
+      if: always()
+      run: |
+        # Create test artifacts directory
+        mkdir -p test-artifacts
+        
+        # Copy any log files
+        if [ -f "$HOME/Documents/LearnKeysUDP.log" ]; then
+          cp "$HOME/Documents/LearnKeysUDP.log" test-artifacts/
+        fi
+        
+        # Create build info
+        cd LearnKeysUDP-Clean
+        echo "Build Information:" > ../test-artifacts/build-info.txt
+        echo "==================" >> ../test-artifacts/build-info.txt
+        echo "Date: $(date)" >> ../test-artifacts/build-info.txt
+        echo "Swift Version: $(swift --version)" >> ../test-artifacts/build-info.txt
+        echo "macOS Version: $(sw_vers)" >> ../test-artifacts/build-info.txt
+        echo "" >> ../test-artifacts/build-info.txt
+        echo "Build Artifacts:" >> ../test-artifacts/build-info.txt
+        echo "================" >> ../test-artifacts/build-info.txt
+        ls -la .build/arm64-apple-macosx/debug/ >> ../test-artifacts/build-info.txt 2>/dev/null || echo "No debug build artifacts" >> ../test-artifacts/build-info.txt
+        ls -la .build/arm64-apple-macosx/release/ >> ../test-artifacts/build-info.txt 2>/dev/null || echo "No release build artifacts" >> ../test-artifacts/build-info.txt
+    
+    - name: Upload build artifacts
+      if: success()
       uses: actions/upload-artifact@v3
       with:
-        name: LearnKeys-executable
-        path: build/LearnKeys
+        name: LearnKeysUDP-builds
+        path: |
+          LearnKeysUDP-Clean/.build/arm64-apple-macosx/debug/LearnKeysUDP
+          LearnKeysUDP-Clean/.build/arm64-apple-macosx/release/LearnKeysUDP
+    
+    - name: Upload test artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-artifacts
+        path: test-artifacts/
+        retention-days: 7
+
+  verify-architecture:
+    runs-on: macos-latest
+    needs: build-and-test
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Verify UDP-first architecture compliance
+      run: |
+        echo "🏗️ Verifying UDP-first architecture compliance..."
+        
+        # Check that UDP implementation exists and has expected structure
+        cd LearnKeysUDP-Clean
+        
+        echo "📂 Checking directory structure..."
+        required_dirs=("App" "Core" "Views" "Models" "Utils" "Tests")
+        for dir in "${required_dirs[@]}"; do
+          if [ -d "$dir" ]; then
+            echo "✅ Directory exists: $dir"
+          else
+            echo "❌ Missing required directory: $dir"
+            exit 1
+          fi
+        done
+        
+        echo ""
+        echo "📄 Checking core files..."
+        required_files=(
+          "App/LearnKeysUDPApp.swift"
+          "Core/UDPKeyTracker.swift"
+          "Core/AnimationController.swift"
+          "Core/LayerManager.swift"
+          "Package.swift"
+        )
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✅ File exists: $file"
+          else
+            echo "❌ Missing required file: $file"
+            exit 1
+          fi
+        done
+        
+        echo ""
+        echo "🔍 Verifying UDP implementation..."
+        if grep -q "UDPKeyTracker" Core/UDPKeyTracker.swift; then
+          echo "✅ UDPKeyTracker implementation found"
+        else
+          echo "❌ UDPKeyTracker implementation not found"
+          exit 1
+        fi
+        
+        if grep -q "6789" Core/UDPKeyTracker.swift; then
+          echo "✅ UDP port 6789 configured"
+        else
+          echo "❌ UDP port 6789 not found in configuration"
+          exit 1
+        fi
+        
+        echo ""
+        echo "🔍 Verifying headless mode support..."
+        if grep -q "headless" App/LearnKeysUDPApp.swift; then
+          echo "✅ Headless mode support found"
+        else
+          echo "❌ Headless mode support not found"
+          exit 1
+        fi
+        
+        echo ""
+        echo "✅ Architecture verification passed!"
