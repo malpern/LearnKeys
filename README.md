@@ -1,12 +1,13 @@
 # LearnKeys UDP-First Implementation
 
-**Status:** ✅ **Phase 1 COMPLETE** - Production-ready UDP-driven keyboard visualizer
+**Status:** ✅ **Phase 1 FULLY VERIFIED** - Production-ready UDP-driven keyboard visualizer
 
 ## 🚀 Quick Start
 
 ```bash
-# Run the app
-swift run LearnKeysUDP
+# Run the app (with visible window)
+cd LearnKeysUDP-Clean
+open .build/arm64-apple-macosx/debug/LearnKeysUDP
 
 # Test UDP messages (in another terminal)
 printf "keypress:a\n" | nc -u -w 1 127.0.0.1 6789
