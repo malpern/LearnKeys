@@ -40,7 +40,7 @@ class AnimationController: ObservableObject {
     
     private func animateKeyPress(_ key: String) {
         DispatchQueue.main.async {
-            print("🎯 Animating key press: \(key)")
+            LogManager.shared.log("🎯 Animating key press: \(key)")
             
             let keyType = self.determineKeyType(key)
             self.keyStates[key] = KeyState(key: key, isPressed: true, keyType: keyType)
@@ -55,7 +55,7 @@ class AnimationController: ObservableObject {
     
     private func animateNavigation(_ key: String) {
         DispatchQueue.main.async {
-            print("🧭 Animating navigation: \(key)")
+            LogManager.shared.log("🧭 Animating navigation: \(key)")
             
             self.keyStates[key] = KeyState(key: key, isPressed: true, keyType: .navigation)
             
@@ -68,7 +68,7 @@ class AnimationController: ObservableObject {
     
     private func updateModifierState(_ modifier: String, isActive: Bool) {
         DispatchQueue.main.async {
-            print("🎛️ Updating modifier \(modifier): \(isActive ? "active" : "inactive")")
+            LogManager.shared.log("🎛️ Updating modifier \(modifier): \(isActive ? "active" : "inactive")")
             
             if isActive {
                 self.modifierStates[modifier] = ModifierState(modifier: modifier, isActive: true)
@@ -87,7 +87,7 @@ class AnimationController: ObservableObject {
     
     private func transitionToLayer(_ layer: String) {
         DispatchQueue.main.async {
-            print("🗂️ Transitioning to layer: \(layer)")
+            LogManager.shared.log("🗂️ Transitioning to layer: \(layer)")
             
             self.currentLayer = layer
             self.layerTransitionStartTime = Date()
@@ -137,7 +137,7 @@ class AnimationController: ObservableObject {
     // MARK: - Testing Support
     
     func simulateUDPMessage(_ message: String) {
-        print("🧪 Simulating UDP message: \(message)")
+        LogManager.shared.log("🧪 Simulating UDP message: \(message)")
         udpTracker.processMessage(message)
     }
     
@@ -175,7 +175,7 @@ extension AnimationController {
                 transitionToLayer(String(components[1]))
             }
         default:
-            print("❓ Unknown test message type")
+            LogManager.shared.log("❓ Unknown test message type")
         }
     }
 } 

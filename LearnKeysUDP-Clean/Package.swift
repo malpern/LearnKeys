@@ -29,6 +29,7 @@ let package = Package(
                 "Models/KeyState.swift",
                 "Models/KanataConfig.swift",
                 "Utils/KeyCodeMapper.swift",
+                "Utils/LogManager.swift",
             ]
         ),
     ]

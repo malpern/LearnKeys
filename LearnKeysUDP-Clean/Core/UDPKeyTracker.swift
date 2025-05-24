@@ -42,10 +42,10 @@ class UDPKeyTracker: ObservableObject {
             listener?.stateUpdateHandler = { state in
                 switch state {
                 case .ready:
-                    print("🎯 UDP-First KeyTracker ready on port 6789")
-                    print("🎯 Listening for: keypress:*, navkey:*, modifier:*, layer:*")
+                    LogManager.shared.log("🎯 UDP-First KeyTracker ready on port 6789")
+                    LogManager.shared.log("🎯 Listening for: keypress:*, navkey:*, modifier:*, layer:*")
                 case .failed(let error):
-                    print("❌ UDP KeyTracker failed: \(error)")
+                    LogManager.shared.log("❌ UDP KeyTracker failed: \(error)")
                 default:
                     break
                 }
@@ -54,7 +54,7 @@ class UDPKeyTracker: ObservableObject {
             listener?.start(queue: queue)
             
         } catch {
-            print("❌ UDP KeyTracker setup failed: \(error)")
+            LogManager.shared.log("❌ UDP KeyTracker setup failed: \(error)")
         }
     }
     
@@ -81,11 +81,11 @@ class UDPKeyTracker: ObservableObject {
     // MARK: - Message Processing
     
     func processMessage(_ message: String) {
-        print("🎯 UDP received: '\(message)'")
+        LogManager.shared.log("🎯 UDP received: '\(message)'")
         
         let components = message.split(separator: ":")
         guard !components.isEmpty else {
-            print("⚠️ Empty UDP message")
+            LogManager.shared.log("⚠️ Empty UDP message")
             return
         }
         
@@ -103,7 +103,7 @@ class UDPKeyTracker: ObservableObject {
         case "combo":
             handleCombo(components)
         default:
-            print("❓ Unknown UDP message type: '\(messageType)'")
+            LogManager.shared.log("❓ Unknown UDP message type: '\(messageType)'")
         }
     }
     
@@ -111,7 +111,7 @@ class UDPKeyTracker: ObservableObject {
         guard components.count >= 2 else { return }
         
         let key = String(components[1]).lowercased()
-        print("⌨️ Key press: '\(key)'")
+        LogManager.shared.log("⌨️ Key press: '\(key)'")
         
         activateKey(key)
         onKeyPress?(key)
@@ -121,7 +121,7 @@ class UDPKeyTracker: ObservableObject {
         guard components.count >= 2 else { return }
         
         let key = String(components[1]).lowercased()
-        print("🧭 Navigation key: '\(key)'")
+        LogManager.shared.log("🧭 Navigation key: '\(key)'")
         
         activateNavKey(key)
         onNavigationKey?(key)
@@ -134,7 +134,7 @@ class UDPKeyTracker: ObservableObject {
         let state = String(components[2])
         let isActive = state == "down"
         
-        print("🎛️ Modifier \(modifier): \(isActive ? "down" : "up")")
+        LogManager.shared.log("🎛️ Modifier \(modifier): \(isActive ? "down" : "up")")
         
         if isActive {
             activateModifier(modifier)
@@ -149,7 +149,7 @@ class UDPKeyTracker: ObservableObject {
         guard components.count >= 2 else { return }
         
         let layer = String(components[1])
-        print("🗂️ Layer change: '\(layer)'")
+        LogManager.shared.log("🗂️ Layer change: '\(layer)'")
         
         updateLayer(layer)
         onLayerChange?(layer)
@@ -159,7 +159,7 @@ class UDPKeyTracker: ObservableObject {
         guard components.count >= 2 else { return }
         
         let keys = String(components[1]).split(separator: "+").map { String($0).lowercased() }
-        print("🤝 Combo keys: \(keys)")
+        LogManager.shared.log("🤝 Combo keys: \(keys)")
         
         // Activate all keys in the combo
         for key in keys {

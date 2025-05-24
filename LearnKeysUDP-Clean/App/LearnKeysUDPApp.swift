@@ -12,9 +12,9 @@ struct LearnKeysUDPApp: App {
                 .environmentObject(animationController)
                 .environmentObject(layerManager)
                 .onAppear {
-                    print("🎯 LearnKeys UDP-First started!")
-                    print("🎯 Architecture: Clean UDP-driven design")
-                    print("🎯 No accessibility permissions needed")
+                    LogManager.shared.logInit("🎯 LearnKeys UDP-First started!")
+                    LogManager.shared.logInit("🎯 Architecture: Clean UDP-driven design")
+                    LogManager.shared.logInit("🎯 No accessibility permissions needed")
                 }
         }
         .windowResizability(.contentSize)
@@ -174,7 +174,7 @@ struct ContentView: View {
     }
     
     private func testUDPMessage(_ message: String) {
-        print("🧪 Testing UDP message: \(message)")
+        LogManager.shared.log("🧪 Testing UDP message: \(message)", category: .general)
         animationController.processTestMessage(message)
     }
 } 
