@@ -20,13 +20,15 @@ let package = Package(
             path: ".",
             sources: [
                 "App/LearnKeysUDPApp.swift",
-                "Core/AnimationController.swift", 
                 "Core/UDPKeyTracker.swift",
+                "Core/AnimationController.swift", 
+                "Core/LayerManager.swift",
                 "Views/KeyboardView.swift",
                 "Views/KeyView.swift",
+                "Views/LayerIndicator.swift",
                 "Models/KeyState.swift",
                 "Models/KanataConfig.swift",
-                "Utils/KeyCodeMapper.swift"
+                "Utils/KeyCodeMapper.swift",
             ]
         ),
     ]

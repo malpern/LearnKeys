@@ -41,30 +41,29 @@ class AnimationController: ObservableObject {
     
     private func animateKeyPress(_ key: String) {
         DispatchQueue.main.async {
-            let keyType = self.determineKeyType(key)
-            LogManager.shared.log("🎨 Animating key press: \(key) (type: \(keyType))", category: "ANIM")
+            print("🎯 Animating key press: \(key)")
             
+            let keyType = self.determineKeyType(key)
             self.keyStates[key] = KeyState(key: key, isPressed: true, keyType: keyType)
             
             // Auto-deactivate after animation duration
             let duration = keyType == .navigation ? 0.2 : 0.3
             DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
                 self.keyStates[key]?.isPressed = false
-                LogManager.shared.log("🎨 Animation complete: \(key)", category: "ANIM")
             }
         }
     }
     
     private func updateModifierState(_ modifier: String, _ isActive: Bool) {
         DispatchQueue.main.async {
-            LogManager.shared.log("🔧 Modifier state update: \(modifier) -> \(isActive ? "ACTIVE" : "INACTIVE")", category: "MOD")
+            print("🎯 Modifier \(modifier): \(isActive ? "activated" : "deactivated")")
             self.modifierStates[modifier] = ModifierState(modifier: modifier, isActive: isActive)
         }
     }
     
     private func transitionToLayer(_ layer: String) {
         DispatchQueue.main.async {
-            LogManager.shared.log("🎚️  Layer transition: \(self.currentLayer) -> \(layer)", category: "LAYER")
+            print("🎯 Layer transition to: \(layer)")
             self.currentLayer = layer
             self.layerTransitionStartTime = Date()
         }
@@ -72,13 +71,12 @@ class AnimationController: ObservableObject {
     
     private func animateNavigation(_ key: String) {
         DispatchQueue.main.async {
-            LogManager.shared.log("🧭 Navigation animation: \(key)", category: "NAV")
+            print("🎯 Navigation animation: \(key)")
             self.keyStates[key] = KeyState(key: key, isPressed: true, keyType: .navigation)
             
             // Navigation keys have faster animations
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 self.keyStates[key]?.isPressed = false
-                LogManager.shared.log("🧭 Navigation animation complete: \(key)", category: "NAV")
             }
         }
     }

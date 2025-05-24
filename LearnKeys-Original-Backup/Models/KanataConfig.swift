@@ -8,6 +8,66 @@ struct KanataConfig {
     var aliases: [String: KanataAlias] = [:]
     var variables: [String: String] = [:]
     var displayMappings: [String: DisplayMapping] = [:]  // New: display metadata from config
+    
+    // MARK: - Helper Methods
+    
+    func getDisplaySymbol(for key: String, in layer: String) -> String {
+        // First check for custom display mapping
+        if let mapping = displayMappings[key] {
+            return mapping.symbol
+        }
+        
+        // Then check layer mappings
+        if let layerKeys = layers[layer], 
+           let keyIndex = defsrc.firstIndex(of: key),
+           keyIndex < layerKeys.count {
+            let mappedKey = layerKeys[keyIndex]
+            if mappedKey != "_" && mappedKey != key {
+                return mappedKey.uppercased()
+            }
+        }
+        
+        // Fall back to default symbols
+        switch key {
+        case "spc": return "⎵"
+        case ";": return ";"
+        case ",": return ","
+        case ".": return "."
+        case "/": return "/"
+        default: return key.uppercased()
+        }
+    }
+    
+    func getKeyDescription(for key: String) -> String? {
+        // Return descriptions for modifier keys
+        switch key {
+        case "a": return "shift"
+        case "s": return "ctrl"
+        case "d": return "opt"
+        case "f": return "nav"
+        case "g": return "cmd"
+        case "j": return "cmd"
+        case "k": return "opt"
+        case "l": return "ctrl"
+        case ";": return "shift"
+        default: return nil
+        }
+    }
+    
+    // MARK: - Default Configuration
+    
+    static let defaultQWERTY = KanataConfig(
+        defsrc: ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
+                 "a", "s", "d", "f", "g", "h", "j", "k", "l", ";",
+                 "z", "x", "c", "v", "b", "n", "m", ",", ".", "/",
+                 "spc"],
+        layers: [
+            "base": ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
+                     "a", "s", "d", "f", "g", "h", "j", "k", "l", ";",
+                     "z", "x", "c", "v", "b", "n", "m", ",", ".", "/",
+                     "spc"]
+        ]
+    )
 }
 
 struct DisplayMapping {

@@ -74,7 +74,7 @@ struct ContentView: View {
                 .foregroundColor(.secondary)
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color(.systemGray6))
         .cornerRadius(12)
         .padding(.horizontal)
     }
