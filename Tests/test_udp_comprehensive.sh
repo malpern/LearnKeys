@@ -11,11 +11,13 @@ echo "📍 Testing UDP implementation on port $UDP_PORT"
 # Function to run build verification
 verify_build() {
     echo "🔨 Verifying build..."
-    if [ -f ".build/arm64-apple-macosx/debug/LearnKeysUDP" ]; then
-        echo "✅ Build artifact found"
+    if [ -f "LearnKeysUDP-Clean/.build/arm64-apple-macosx/debug/LearnKeysUDP" ]; then
+        echo "✅ Build artifact found: LearnKeysUDP-Clean/.build/arm64-apple-macosx/debug/LearnKeysUDP"
+        ls -la LearnKeysUDP-Clean/.build/arm64-apple-macosx/debug/LearnKeysUDP
         return 0
     else
-        echo "❌ Build artifact not found"
+        echo "❌ Build artifact not found: LearnKeysUDP-Clean/.build/arm64-apple-macosx/debug/LearnKeysUDP"
+        echo "💡 Run 'cd LearnKeysUDP-Clean && swift build' first"
         return 1
     fi
 }
