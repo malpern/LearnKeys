@@ -45,6 +45,12 @@ class AnimationController: ObservableObject {
     
     private func animateKeyPress(_ key: String) {
         DispatchQueue.main.async {
+fffjlkjaasdf            // Suppress all home row letter animations in f-nav layer
+            let homeRowKeys = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"]
+            if self.currentLayer == "f-nav" && homeRowKeys.contains(key.lowercased()) {
+                LogManager.shared.log("🚫 Suppressing home row letter animation for \(key) in f-nav layer")
+                return
+            }
             LogManager.shared.log("🎯 Animating key press: \(key)")
             
             let keyType = self.determineKeyType(key)

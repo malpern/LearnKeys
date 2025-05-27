@@ -6,6 +6,8 @@ class TCPKeyTracker: ObservableObject {
     @Published var activeKeys: Set<String> = []  // Track all key presses
     @Published var activeModifiers: Set<String> = []  // Track modifiers
     @Published var currentLayer: String = "base"  // Track layer changes via TCP
+    @Published var isKanataActive: Bool = false // Tracks if Kanata has sent a message recently
+    @Published var didFailToStartListening: Bool = false // Tracks if the TCP listener failed to start
     
     // Callbacks for the AnimationController
     var onKeyPress: ((String) -> Void)?
@@ -24,6 +26,7 @@ class TCPKeyTracker: ObservableObject {
     // Heartbeat system to detect stuck modifiers
     private var modifierHeartbeats: [String: Date] = [:]
     private var heartbeatTimer: Timer?
+    private var kanataActivityTimer: Timer?
     
     init() {
         setupTCPListener()
@@ -32,6 +35,8 @@ class TCPKeyTracker: ObservableObject {
     
     deinit {
         stopListening()
+        heartbeatTimer?.invalidate()
+        kanataActivityTimer?.invalidate()
     }
     
     private func setupTCPListener() {
@@ -42,13 +47,17 @@ class TCPKeyTracker: ObservableObject {
                 self?.handleConnection(connection)
             }
             
-            listener?.stateUpdateHandler = { state in
+            listener?.stateUpdateHandler = { [weak self] state in
                 switch state {
                 case .ready:
                     print("🔗 TCP KeyTracker ready on port 6790")
                     print("🔗 Listening for: navkey:*, keypress:*, modifier:*, layer:*")
                 case .failed(let error):
                     print("🔗 TCP KeyTracker failed: \(error)")
+                    // Signal that the listener failed to start
+                    DispatchQueue.main.async {
+                        self?.didFailToStartListening = true
+                    }
                 default:
                     break
                 }
@@ -58,6 +67,10 @@ class TCPKeyTracker: ObservableObject {
             
         } catch {
             print("🔗 TCP KeyTracker setup failed: \(error)")
+            // Signal that the listener failed to start due to an exception
+            DispatchQueue.main.async {
+                self.didFailToStartListening = true
+            }
         }
     }
     
@@ -114,6 +127,7 @@ class TCPKeyTracker: ObservableObject {
     
     func processMessage(_ message: String) {
         print("🔗 TCP received: '\(message)'")
+        updateKanataActivity() // Mark Kanata as active and reset timeout
         
         // Parse different message types
         if message.hasPrefix("navkey:") {
@@ -409,6 +423,24 @@ class TCPKeyTracker: ObservableObject {
         
         // Clear heartbeat tracking
         modifierHeartbeats.removeAll()
+    }
+    
+    private func updateKanataActivity() {
+        DispatchQueue.main.async {
+            if !self.isKanataActive {
+                print("🔗 Kanata became active.")
+            }
+            self.isKanataActive = true
+            self.kanataActivityTimer?.invalidate()
+            self.kanataActivityTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+                DispatchQueue.main.async {
+                    if self?.isKanataActive == true { // Check if it was true before setting to false
+                        print("🔗 Kanata activity timeout. Marking as inactive.")
+                    }
+                    self?.isKanataActive = false
+                }
+            }
+        }
     }
     
     // MARK: - Debug Methods

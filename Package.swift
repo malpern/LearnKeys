@@ -2,20 +2,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "LearnKeysTCP",
+    name: "LearnKeys",
     platforms: [
         .macOS(.v13)
     ],
     products: [
         .executable(
-            name: "LearnKeysTCP",
-            targets: ["LearnKeysTCP"]
+            name: "LearnKeys",
+            targets: ["LearnKeys"]
         ),
     ],
     dependencies: [],
     targets: [
         .executableTarget(
-            name: "LearnKeysTCP",
+            name: "LearnKeys",
             dependencies: [],
             path: ".",
             exclude: [
@@ -29,10 +29,11 @@ let package = Package(
                 ".build-learnkeys/"
             ],
             sources: [
-                "App/LearnKeysTCPApp.swift",
+                "App/LearnKeyApp.swift",
                 "Core/TCPKeyTracker.swift",
                 "Core/AnimationController.swift", 
                 "Core/LayerManager.swift",
+                "Core/ProcessChecker.swift",
                 "Views/KeyboardView.swift",
                 "Views/KeyView.swift",
                 "Views/LayerIndicator.swift",

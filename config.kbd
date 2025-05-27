@@ -47,6 +47,14 @@
   option-up (cmd sh -c "echo 'modifier:option:up' | nc 127.0.0.1 6790")
   command-down (cmd sh -c "echo 'modifier:command:down' | nc 127.0.0.1 6790")
   command-up (cmd sh -c "echo 'modifier:command:up' | nc 127.0.0.1 6790")
+  rcommand-down (cmd sh -c "echo 'modifier:rcommand:down' | nc 127.0.0.1 6790")
+  rcommand-up (cmd sh -c "echo 'modifier:rcommand:up' | nc 127.0.0.1 6790")
+  rcontrol-down (cmd sh -c "echo 'modifier:rcontrol:down' | nc 127.0.0.1 6790")
+  rcontrol-up (cmd sh -c "echo 'modifier:rcontrol:up' | nc 127.0.0.1 6790")
+  roption-down (cmd sh -c "echo 'modifier:roption:down' | nc 127.0.0.1 6790")
+  roption-up (cmd sh -c "echo 'modifier:roption:up' | nc 127.0.0.1 6790")
+  rshift-down (cmd sh -c "echo 'modifier:rshift:down' | nc 127.0.0.1 6790")
+  rshift-up (cmd sh -c "echo 'modifier:rshift:up' | nc 127.0.0.1 6790")
   layer-down (cmd sh -c "echo 'layer:f-nav:down' | nc 127.0.0.1 6790")
   layer-up (cmd sh -c "echo 'layer:f-nav:up' | nc 127.0.0.1 6790")
   navkey-h-down (cmd sh -c "echo 'navkey:h:down' | nc 127.0.0.1 6790")
@@ -136,18 +144,18 @@
     (multi j (cmd sh -c "echo 'keypress:j:tap' | nc 127.0.0.1 6790"))
     (multi 
       rmet 
-      (on-press tap-virtualkey command-down)
-      (on-release tap-virtualkey command-up)
+      (on-press tap-virtualkey rcommand-down)
+      (on-release tap-virtualkey rcommand-up)
     )
   )
   
   ;; K key - Right Option (also debug key for testing)
   k (tap-hold $tap-time $hold-time 
-    @debug-key  ;; Tap: use debug key for testing
+    (multi k (cmd sh -c "echo 'keypress:k:tap' | nc 127.0.0.1 6790"))
     (multi 
       ralt 
-      (on-press tap-virtualkey option-down)
-      (on-release tap-virtualkey option-up)
+      (on-press tap-virtualkey roption-down)
+      (on-release tap-virtualkey roption-up)
     )
   )
   
@@ -156,18 +164,18 @@
     (multi l (cmd sh -c "echo 'keypress:l:tap' | nc 127.0.0.1 6790"))
     (multi 
       rctl 
-      (on-press tap-virtualkey control-down)
-      (on-release tap-virtualkey control-up)
+      (on-press tap-virtualkey rcontrol-down)
+      (on-release tap-virtualkey rcontrol-up)
     )
   )
   
   ;; ; key - Right Shift
   ; (tap-hold $tap-time $hold-time 
-    (multi ; (cmd sh -c "echo 'keypress:semicolon:tap' | nc 127.0.0.1 6790"))
+    (multi ; (cmd sh -c "echo 'keypress:;:tap' | nc 127.0.0.1 6790"))
     (multi 
       rsft 
-      (on-press tap-virtualkey shift-down)
-      (on-release tap-virtualkey shift-up)
+      (on-press tap-virtualkey rshift-down)
+      (on-release tap-virtualkey rshift-up)
     )
   )
 

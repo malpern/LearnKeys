@@ -65,7 +65,7 @@ class DraggableWindow: NSWindow {
 }
 
 @main
-struct LearnKeysTCPApp: App {
+struct LearnKeyApp: App {
     @StateObject private var animationController = AnimationController()
     @StateObject private var layerManager = LayerManager()
     @StateObject private var kanataManager = KanataManager.shared
@@ -78,7 +78,18 @@ struct LearnKeysTCPApp: App {
         if Self.isHeadless {
             HeadlessTCPServer.shared.start()
         } else {
-            // GUI mode - Kanata runs independently
+            // GUI mode - Perform pre-flight checks
+            do {
+                try ProcessChecker.checkForConflictingProcesses()
+            } catch {
+                // ProcessChecker already logs the critical error
+                LogManager.shared.logError("Application will now exit due to conflicting processes.")
+                exit(1) // Exit immediately
+                // The 'return' here is now effectively unreachable but kept for clarity
+                // that no further initialization in this block should occur.
+                return
+            }
+            
             LogManager.shared.logInit("🚀 Starting GUI mode - Kanata should be launched separately")
         }
     }
@@ -108,6 +119,13 @@ struct LearnKeysTCPApp: App {
                         LogManager.shared.logInit("🎯 No accessibility permissions needed")
                         configureWindow()
                     }
+                    // Monitor TCPKeyTracker for startup failure
+                    .onReceive(animationController.tcpKeyTracker.$didFailToStartListening) { didFail in
+                        if didFail {
+                            LogManager.shared.logError("CRITICAL ERROR: TCP Server failed to start (e.g., port 6790 in use). Another instance might be running. Application will exit.")
+                            exit(1) // Exit immediately
+                        }
+                    }
             }
         }
         .windowStyle(.hiddenTitleBar)
@@ -116,7 +134,7 @@ struct LearnKeysTCPApp: App {
         .commands {
             // Add standard macOS app menu
             CommandGroup(replacing: .appInfo) {
-                Button("About LearnKeys") {
+                Button("About LearnKey") {
                     // Could add about dialog later
                 }
             }
@@ -134,7 +152,14 @@ struct LearnKeysTCPApp: App {
                 
                 Divider()
                 
-                Button("Quit LearnKeys") {
+                Button("Quit LearnKey") {
+                    // Run pkill -f kanata
+                    let process = Process()
+                    process.launchPath = "/usr/bin/pkill"
+                    process.arguments = ["-f", "kanata"]
+                    try? process.run()
+                    process.waitUntilExit()
+                    // Quit the app
                     NSApp.terminate(nil)
                 }
                 .keyboardShortcut("q", modifiers: .command)
@@ -239,9 +264,9 @@ struct HeaderView: View {
                 
                 Spacer()
                 
-                Text("config.kbd")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                // Text("config.kbd")
+                //     .font(.caption)
+                //     .foregroundColor(.gray)
             }
             
             HStack {
@@ -251,62 +276,62 @@ struct HeaderView: View {
                 
                 Spacer()
                 
-                HStack(spacing: 12) {
-                    // TCP Connection Status
-                    Circle()
-                        .fill(.green)
-                        .frame(width: 12, height: 12)
+                // HStack(spacing: 12) {
+                //     // TCP Connection Status - now reflects Kanata activity
+                //     Circle()
+                //         .fill(animationController.tcpKeyTracker.isKanataActive ? .green : .red)
+                //         .frame(width: 12, height: 12)
                     
-                    Text("TCP Connected")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                //     Text(animationController.tcpKeyTracker.isKanataActive ? "TCP Active" : "TCP Inactive")
+                //         .font(.caption)
+                //         .foregroundColor(.gray)
                     
-                    // Separator
-                    Text("•")
-                        .font(.caption)
-                        .foregroundColor(.gray.opacity(0.5))
+                //     // Separator
+                //     Text("•")
+                //         .font(.caption)
+                //         .foregroundColor(.gray.opacity(0.5))
                     
-                    // Kanata Status
-                    Circle()
-                        .fill(kanataManager.isKanataRunning ? .green : .red)
-                        .frame(width: 12, height: 12)
+                //     // Kanata Status - uses isKanataActive from TCPKeyTracker via AnimationController
+                //     Circle()
+                //         .fill(animationController.tcpKeyTracker.isKanataActive ? .green : .red)
+                //         .frame(width: 12, height: 12)
                     
-                    Text("Kanata: \(kanataManager.kanataStatus)")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
+                //     Text(animationController.tcpKeyTracker.isKanataActive ? "Kanata: Active" : "Kanata: Inactive")
+                //         .font(.caption)
+                //         .foregroundColor(.gray)
+                // }
             }
             
             // Debug Controls for Modifier Testing
-            HStack(spacing: 8) {
-                Text("Debug:")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+            // HStack(spacing: 8) {
+            //     Text("Debug:")
+            //         .font(.caption)
+            //         .foregroundColor(.gray)
                 
-                Button("Clear Stuck Modifiers") {
-                    animationController.tcpKeyTracker.debugClearAllModifiers()
-                }
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(.red.opacity(0.2))
-                .foregroundColor(.red)
-                .cornerRadius(4)
+            //     Button("Clear Stuck Modifiers") {
+            //         animationController.tcpKeyTracker.debugClearAllModifiers()
+            //     }
+            //     .font(.caption)
+            //     .padding(.horizontal, 8)
+            //     .padding(.vertical, 4)
+            //     .background(.red.opacity(0.2))
+            //     .foregroundColor(.red)
+            //     .cornerRadius(4)
                 
-                Button("Test Shift") {
-                    let tcpTracker = animationController.tcpKeyTracker
-                    tcpTracker.debugModifierDown("shift")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        tcpTracker.debugModifierUp("shift")
-                    }
-                }
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(.blue.opacity(0.2))
-                .foregroundColor(.blue)
-                .cornerRadius(4)
-            }
+            //     Button("Test Shift") {
+            //         let tcpTracker = animationController.tcpKeyTracker
+            //         tcpTracker.debugModifierDown("shift")
+            //         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            //             tcpTracker.debugModifierUp("shift")
+            //         }
+            //     }
+            //     .font(.caption)
+            //     .padding(.horizontal, 8)
+            //     .padding(.vertical, 4)
+            //     .background(.blue.opacity(0.2))
+            //     .foregroundColor(.blue)
+            //     .cornerRadius(4)
+            // }
         }
         .padding()
     }
