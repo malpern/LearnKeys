@@ -1,0 +1,20 @@
+;; ULTRA-SIMPLE TEST - Just log every 'a' key press
+;; No tap-hold, no modifiers, just basic cmd execution test
+
+(defcfg
+  process-unmapped-keys yes
+  danger-enable-cmd yes
+  log-layer-changes no
+)
+
+(defsrc
+  a
+)
+
+(deflayer base
+  @a_simple
+)
+
+(defalias
+  a_simple (multi a (cmd sh -c "echo 'SIMPLE_A_PRESS' >> /tmp/kanata_test.log"))
+) 

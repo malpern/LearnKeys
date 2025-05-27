@@ -1,0 +1,269 @@
+;; NO-FORK KANATA CONFIGURATION - Layer Switching Method with TCP
+;; 
+;; BREAKTHROUGH SOLUTION: Uses layer switching instead of fork constructs
+;; to reliably capture modifier press/release events on macOS
+;;
+;; HOME ROW MODIFIERS:
+;; - Left hand:  A(shift) S(ctrl) D(option) F(nav) G(command)
+;; - Right hand: J(command) K(option) L(ctrl) ;(shift)
+;; - All modifiers use layer switching for reliable press/release detection
+;;
+;; NAVIGATION LAYERS:
+;; - F (hold): Basic vim navigation with hjkl = arrow keys
+;; - Spacebar (hold): Same navigation as F-hold
+;; 
+;; TCP TRACKING:
+;; - All keys send keypress:* notifications via TCP port 6790
+;; - All modifiers send modifier:*:down/up notifications via layer switching
+;; - Navigation keys send navkey:* notifications
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  log-layer-changes no
+)
+
+(defsrc
+  q w e r t y u i o p a s d f g h j k l ; z x c v b n m spc left down up right
+)
+
+(defvar
+  ;; Timing variables
+  tap-time 200
+  hold-time 150
+  a-tap-time 300  ;; pinky needs more time
+  a-hold-time 200
+  s-tap-time 300  ;; ring finger needs more time
+  s-hold-time 200
+  
+  ;; Hand groupings for early activation
+  left-hand-keys (
+    q w e r t
+    a s d f g
+    z x c v b
+  )
+  right-hand-keys (
+    y u i o p
+    h j k l ;
+    n m , . /
+  )
+)
+
+;; Base layer - normal typing
+(deflayer base
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g @h @j @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+;; Navigation layer (F-hold or spacebar-hold)
+(deflayer f-nav
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @fnav_h @fnav_j @fnav_k @fnav_l _ _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+;; Modifier tracking layers - one for each modifier
+(deflayer shift-held
+  @q @w @e @r @t @y @u @i @o @p @a_shift_release @s @d @f @g @h @j @k @l @semicolon_shift_release @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(deflayer ctrl-held
+  @q @w @e @r @t @y @u @i @o @p @a @s_ctrl_release @d @f @g @h @j @k @l_ctrl_release @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(deflayer option-held
+  @q @w @e @r @t @y @u @i @o @p @a @s @d_option_release @f @g @h @j @k_option_release @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(deflayer command-held
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g_command_release @h @j_command_release @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(defalias
+  ;; Basic modifiers
+  shift lsft
+  control lctl
+  option lalt
+  command lmet
+  rshift rsft
+  rcontrol rctl
+  roption ralt
+  rcommand rmet
+
+  ;; LEFT HAND MODIFIERS - Layer switching approach
+  
+  ;; A key - Left Shift
+  a (tap-hold $a-tap-time $a-hold-time 
+    ;; Tap: send 'a' + notification
+    (multi a (cmd sh -c "echo 'keypress:a' | nc 127.0.0.1 6790"))
+    ;; Hold: activate shift + send DOWN + switch to tracking layer
+    (multi 
+      @shift 
+      (cmd sh -c "echo 'modifier:shift:down' | nc 127.0.0.1 6790")
+      (layer-switch shift-held)
+    )
+  )
+  
+  ;; Release detector for A key shift
+  a_shift_release (multi
+    (cmd sh -c "echo 'modifier:shift:up' | nc 127.0.0.1 6790")
+    (layer-switch base)
+    a
+  )
+  
+  ;; S key - Left Control
+  s (tap-hold $s-tap-time $s-hold-time 
+    (multi s (cmd sh -c "echo 'keypress:s' | nc 127.0.0.1 6790"))
+    (multi 
+      @control 
+      (cmd sh -c "echo 'modifier:control:down' | nc 127.0.0.1 6790")
+      (layer-switch ctrl-held)
+    )
+  )
+  
+  s_ctrl_release (multi
+    (cmd sh -c "echo 'modifier:control:up' | nc 127.0.0.1 6790")
+    (layer-switch base)
+    s
+  )
+  
+  ;; D key - Left Option
+  d (tap-hold $tap-time $hold-time 
+    (multi d (cmd sh -c "echo 'keypress:d' | nc 127.0.0.1 6790"))
+    (multi 
+      @option 
+      (cmd sh -c "echo 'modifier:option:down' | nc 127.0.0.1 6790")
+      (layer-switch option-held)
+    )
+  )
+  
+  d_option_release (multi
+    (cmd sh -c "echo 'modifier:option:up' | nc 127.0.0.1 6790")
+    (layer-switch base)
+    d
+  )
+  
+  ;; F key - Navigation layer
+  f (tap-hold $tap-time $hold-time 
+    (multi f (cmd sh -c "echo 'keypress:f' | nc 127.0.0.1 6790"))
+    (multi 
+      (layer-toggle f-nav) 
+      (cmd sh -c "echo 'layer:f-nav' | nc 127.0.0.1 6790")
+    )
+  )
+  
+  ;; G key - Left Command
+  g (tap-hold $tap-time $hold-time 
+    (multi g (cmd sh -c "echo 'keypress:g' | nc 127.0.0.1 6790"))
+    (multi 
+      @command 
+      (cmd sh -c "echo 'modifier:command:down' | nc 127.0.0.1 6790")
+      (layer-switch command-held)
+    )
+  )
+  
+  g_command_release (multi
+    (cmd sh -c "echo 'modifier:command:up' | nc 127.0.0.1 6790")
+    (layer-switch base)
+    g
+  )
+
+  ;; RIGHT HAND MODIFIERS
+  
+  ;; J key - Right Command
+  j (tap-hold $tap-time $hold-time 
+    (multi j (cmd sh -c "echo 'keypress:j' | nc 127.0.0.1 6790"))
+    (multi 
+      @rcommand 
+      (cmd sh -c "echo 'modifier:command:down' | nc 127.0.0.1 6790")
+      (layer-switch command-held)
+    )
+  )
+  
+  j_command_release (multi
+    (cmd sh -c "echo 'modifier:command:up' | nc 127.0.0.1 6790")
+    (layer-switch base)
+    j
+  )
+  
+  ;; K key - Right Option
+  k (tap-hold $tap-time $hold-time 
+    (multi k (cmd sh -c "echo 'keypress:k' | nc 127.0.0.1 6790"))
+    (multi 
+      @roption 
+      (cmd sh -c "echo 'modifier:option:down' | nc 127.0.0.1 6790")
+      (layer-switch option-held)
+    )
+  )
+  
+  k_option_release (multi
+    (cmd sh -c "echo 'modifier:option:up' | nc 127.0.0.1 6790")
+    (layer-switch base)
+    k
+  )
+  
+  ;; L key - Right Control
+  l (tap-hold $tap-time $hold-time 
+    (multi l (cmd sh -c "echo 'keypress:l' | nc 127.0.0.1 6790"))
+    (multi 
+      @rcontrol 
+      (cmd sh -c "echo 'modifier:control:down' | nc 127.0.0.1 6790")
+      (layer-switch ctrl-held)
+    )
+  )
+  
+  l_ctrl_release (multi
+    (cmd sh -c "echo 'modifier:control:up' | nc 127.0.0.1 6790")
+    (layer-switch base)
+    l
+  )
+  
+  ;; ; key - Right Shift
+  ; (tap-hold $tap-time $hold-time 
+    (multi ; (cmd sh -c "echo 'keypress:semicolon' | nc 127.0.0.1 6790"))
+    (multi 
+      @rshift 
+      (cmd sh -c "echo 'modifier:shift:down' | nc 127.0.0.1 6790")
+      (layer-switch shift-held)
+    )
+  )
+  
+  semicolon_shift_release (multi
+    (cmd sh -c "echo 'modifier:shift:up' | nc 127.0.0.1 6790")
+    (layer-switch base)
+    ;
+  )
+
+  ;; Spacebar with navigation layer
+  spc (tap-hold $tap-time $hold-time 
+    (multi spc (cmd sh -c "echo 'keypress:spc' | nc 127.0.0.1 6790"))
+    (multi 
+      (layer-toggle f-nav) 
+      (cmd sh -c "echo 'layer:f-nav' | nc 127.0.0.1 6790")
+    )
+  )
+
+  ;; Regular keys with TCP tracking
+  q (multi q (cmd sh -c "echo 'keypress:q' | nc 127.0.0.1 6790"))
+  w (multi w (cmd sh -c "echo 'keypress:w' | nc 127.0.0.1 6790"))
+  e (multi e (cmd sh -c "echo 'keypress:e' | nc 127.0.0.1 6790"))
+  r (multi r (cmd sh -c "echo 'keypress:r' | nc 127.0.0.1 6790"))
+  t (multi t (cmd sh -c "echo 'keypress:t' | nc 127.0.0.1 6790"))
+  y (multi y (cmd sh -c "echo 'keypress:y' | nc 127.0.0.1 6790"))
+  u (multi u (cmd sh -c "echo 'keypress:u' | nc 127.0.0.1 6790"))
+  i (multi i (cmd sh -c "echo 'keypress:i' | nc 127.0.0.1 6790"))
+  o (multi o (cmd sh -c "echo 'keypress:o' | nc 127.0.0.1 6790"))
+  p (multi p (cmd sh -c "echo 'keypress:p' | nc 127.0.0.1 6790"))
+  h (multi h (cmd sh -c "echo 'keypress:h' | nc 127.0.0.1 6790"))
+  z (multi z (cmd sh -c "echo 'keypress:z' | nc 127.0.0.1 6790"))
+  x (multi x (cmd sh -c "echo 'keypress:x' | nc 127.0.0.1 6790"))
+  c (multi c (cmd sh -c "echo 'keypress:c' | nc 127.0.0.1 6790"))
+  v (multi v (cmd sh -c "echo 'keypress:v' | nc 127.0.0.1 6790"))
+  b (multi b (cmd sh -c "echo 'keypress:b' | nc 127.0.0.1 6790"))
+  n (multi n (cmd sh -c "echo 'keypress:n' | nc 127.0.0.1 6790"))
+  m (multi m (cmd sh -c "echo 'keypress:m' | nc 127.0.0.1 6790"))
+
+  ;; Navigation layer keys
+  fnav_h (multi left (cmd sh -c "echo 'navkey:h' | nc 127.0.0.1 6790"))
+  fnav_j (multi down (cmd sh -c "echo 'navkey:j' | nc 127.0.0.1 6790"))
+  fnav_k (multi up (cmd sh -c "echo 'navkey:k' | nc 127.0.0.1 6790"))
+  fnav_l (multi right (cmd sh -c "echo 'navkey:l' | nc 127.0.0.1 6790"))
+) 

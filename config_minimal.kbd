@@ -1,0 +1,38 @@
+;; =============================================================================
+;; MINIMAL LEARNKEYS TEST CONFIG - Just a few keys to avoid process limits
+;; =============================================================================
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  log-layer-changes no
+)
+
+;; Source layout - just a few keys
+(defsrc
+  a s d f
+  h j k l
+)
+
+;; Base layer
+(deflayer base
+  @a @s @d @f
+  @h @j @k @l
+)
+
+(defalias
+  ;; Simple keys without TCP (to test basic functionality)
+  h h
+  j j
+  k k
+  l l
+  
+  ;; Just one key with TCP to test
+  a (multi a (cmd sh -c "echo 'keypress:a:simple' | nc 127.0.0.1 6790"))
+  
+  ;; Simple tap-hold without TCP
+  s (tap-hold 150 400 s lsft)
+  d (tap-hold 150 400 d lctl)
+  f (tap-hold 150 400 f lalt)
+) 

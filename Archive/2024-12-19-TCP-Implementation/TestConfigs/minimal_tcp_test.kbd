@@ -1,0 +1,23 @@
+;; Minimal TCP Test Configuration
+;; Tests if TCP commands work at all
+
+(defcfg
+  process-unmapped-keys yes
+  danger-enable-cmd yes
+)
+
+(defsrc
+  a
+)
+
+(deflayer base
+  @test_a
+)
+
+(defalias
+  ;; Simple test: any 'a' press sends TCP message
+  test_a (multi 
+    a 
+    (cmd sh -c "echo 'test:a_pressed' | nc 127.0.0.1 6790")
+  )
+) 

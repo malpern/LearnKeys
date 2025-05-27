@@ -1,0 +1,54 @@
+;; ENHANCED NO-FORK TEST - WITH RELEASE DETECTION
+;; Testing 'a' key using layer-based state tracking for release events
+;; Expected: KEY_A (tap), SHIFT_DOWN (hold start), SHIFT_UP (hold end)
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  log-layer-changes no
+)
+
+(defsrc
+  a
+)
+
+(defvar
+  a-tap-time 300
+  a-hold-time 200
+)
+
+;; Base layer - normal state
+(deflayer base
+  @a_test
+)
+
+;; Shift active layer - tracks when shift is held
+(deflayer shift-held
+  @a_release
+)
+
+(defalias
+  shift lsft
+  
+  ;; Main 'a' key behavior - switches to shift-held layer on hold
+  a_test (tap-hold $a-tap-time $a-hold-time 
+    ;; Tap action: send KEY_A
+    (multi a (cmd sh -c "echo 'KEY_A' >> /tmp/kanata_test.log"))
+    ;; Hold action: send SHIFT_DOWN, activate shift, switch to tracking layer
+    (multi 
+      @shift 
+      (cmd sh -c "echo 'SHIFT_DOWN' >> /tmp/kanata_test.log")
+      (layer-switch shift-held)
+    )
+  )
+  
+  ;; Release detection - when 'a' is pressed while in shift-held layer
+  a_release (multi
+    ;; Send SHIFT_UP and return to base layer
+    (cmd sh -c "echo 'SHIFT_UP' >> /tmp/kanata_test.log")
+    (layer-switch base)
+    ;; Also send 'a' in case it was a quick tap
+    a
+  )
+) 

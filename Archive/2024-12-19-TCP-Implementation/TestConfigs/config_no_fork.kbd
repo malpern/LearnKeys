@@ -1,0 +1,233 @@
+;; Alternative Kanata Configuration WITHOUT FORK - Layer-Based Modifier Tracking
+;;
+;; APPROACH: Instead of using fork constructs (which fail on macOS), this config uses:
+;; 1. Layer switching to track modifier states
+;; 2. on-press and on-release actions for UDP notifications
+;; 3. Simpler tap-hold patterns that work reliably
+;;
+;; FUNCTIONALITY OVERVIEW:
+;; ----------------------
+;; 
+;; HOME ROW MODIFIERS:
+;; - Left hand:  A(shift) S(ctrl) D(option) F(vim-nav) G(command)
+;; - Right hand: J(command) K(option) L(ctrl) ;(shift)
+;; - Uses layer-based state tracking instead of fork constructs
+;; - Sends UDP notifications on press/release via layer changes
+;;
+;; NAVIGATION LAYERS:
+;; - F (hold): Basic vim navigation with hjkl = arrow keys (←↓↑→)
+;; - Spacebar (hold): Same basic vim navigation as F-hold
+;; 
+;; UDP TRACKING:
+;; - All home row mods send keypress:* notifications on tap
+;; - Modifier states tracked via layer changes with UDP notifications
+;; - Navigation keys send navkey:* notifications for animations
+;; - Layer changes send layer:* notifications
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  log-layer-changes no
+)
+
+(defsrc
+  q w e r t y u i o p a s d f g h j k l ; z x c v b n m spc left down up right
+)
+
+(defvar
+  ;; Timing variables
+  tap-time 200
+  hold-time 150
+  a-tap-time 300  ;; pinky needs more time
+  a-hold-time 200
+  s-tap-time 300  ;; ring finger needs more time
+  s-hold-time 200
+  
+  ;; Hand groupings for early activation
+  left-hand-keys (
+    q w e r t
+    a s d f g
+    z x c v b
+  )
+  right-hand-keys (
+    y u i o p
+    h j k l ;
+    n m , . /
+  )
+)
+
+;; Base layer - normal typing
+(deflayer base
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g @h @j @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+;; Navigation layer (F-hold or spacebar-hold)
+(deflayer f-nav
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @fnav_h @fnav_j @fnav_k @fnav_l _ _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+;; Modifier state layers (for tracking without fork)
+(deflayer shift-active
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g @h @j @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(deflayer ctrl-active
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g @h @j @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(deflayer option-active
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g @h @j @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(deflayer command-active
+  @q @w @e @r @t @y @u @i @o @p @a @s @d @f @g @h @j @k @l @; @z @x @c @v @b @n @m @spc _ _ _ _
+)
+
+(defalias
+  ;; Basic modifiers
+  shift lsft
+  control lctl
+  option lalt
+  command lmet
+  rshift rsft
+  rcontrol rctl
+  roption ralt
+  rcommand rmet
+
+  ;; Alternative modifier tracking using on-press/on-release with layer switching
+  ;; This avoids fork constructs entirely
+  
+  ;; Shift modifier with layer-based tracking
+  shift-down (multi 
+    @shift 
+    (layer-switch shift-active)
+    (cmd sh -c "echo 'modifier:shift:down' | nc -u 127.0.0.1 6789")
+  )
+  shift-up (multi 
+    (layer-switch base)
+    (cmd sh -c "echo 'modifier:shift:up' | nc -u 127.0.0.1 6789")
+  )
+  
+  ;; Control modifier with layer-based tracking
+  control-down (multi 
+    @control 
+    (layer-switch ctrl-active)
+    (cmd sh -c "echo 'modifier:control:down' | nc -u 127.0.0.1 6789")
+  )
+  control-up (multi 
+    (layer-switch base)
+    (cmd sh -c "echo 'modifier:control:up' | nc -u 127.0.0.1 6789")
+  )
+  
+  ;; Option modifier with layer-based tracking
+  option-down (multi 
+    @option 
+    (layer-switch option-active)
+    (cmd sh -c "echo 'modifier:option:down' | nc -u 127.0.0.1 6789")
+  )
+  option-up (multi 
+    (layer-switch base)
+    (cmd sh -c "echo 'modifier:option:up' | nc -u 127.0.0.1 6789")
+  )
+  
+  ;; Command modifier with layer-based tracking
+  command-down (multi 
+    @command 
+    (layer-switch command-active)
+    (cmd sh -c "echo 'modifier:command:down' | nc -u 127.0.0.1 6789")
+  )
+  command-up (multi 
+    (layer-switch base)
+    (cmd sh -c "echo 'modifier:command:up' | nc -u 127.0.0.1 6789")
+  )
+
+  ;; Home row modifiers using tap-hold with on-press/on-release
+  a (tap-hold-release $a-tap-time $a-hold-time 
+    (multi a (cmd sh -c "echo 'keypress:a' | nc -u 127.0.0.1 6789")) 
+    @shift-down 
+    @shift-up
+  )
+  
+  s (tap-hold-release $s-tap-time $s-hold-time 
+    (multi s (cmd sh -c "echo 'keypress:s' | nc -u 127.0.0.1 6789")) 
+    @control-down 
+    @control-up
+  )
+  
+  d (tap-hold-release $tap-time $hold-time 
+    (multi d (cmd sh -c "echo 'keypress:d' | nc -u 127.0.0.1 6789")) 
+    @option-down 
+    @option-up
+  )
+  
+  f (tap-hold-release $tap-time $hold-time 
+    (multi f (cmd sh -c "echo 'keypress:f' | nc -u 127.0.0.1 6789")) 
+    (multi (layer-toggle f-nav) (cmd sh -c "echo 'layer:f-nav' | nc -u 127.0.0.1 6789"))
+    (multi (layer-toggle f-nav) (cmd sh -c "echo 'layer:base' | nc -u 127.0.0.1 6789"))
+  )
+  
+  g (tap-hold-release $tap-time $hold-time 
+    (multi g (cmd sh -c "echo 'keypress:g' | nc -u 127.0.0.1 6789")) 
+    @command-down 
+    @command-up
+  )
+
+  ;; Right hand modifiers
+  j (tap-hold-release $tap-time $hold-time 
+    (multi j (cmd sh -c "echo 'keypress:j' | nc -u 127.0.0.1 6789")) 
+    @command-down 
+    @command-up
+  )
+  
+  k (tap-hold-release $tap-time $hold-time 
+    (multi k (cmd sh -c "echo 'keypress:k' | nc -u 127.0.0.1 6789")) 
+    @option-down 
+    @option-up
+  )
+  
+  l (tap-hold-release $tap-time $hold-time 
+    (multi l (cmd sh -c "echo 'keypress:l' | nc -u 127.0.0.1 6789")) 
+    @control-down 
+    @control-up
+  )
+  
+  ; (tap-hold-release $tap-time $hold-time 
+    (multi ; (cmd sh -c "echo 'keypress:semicolon' | nc -u 127.0.0.1 6789")) 
+    @shift-down 
+    @shift-up
+  )
+
+  ;; Spacebar with navigation layer
+  spc (tap-hold-release $tap-time $hold-time 
+    (multi spc (cmd sh -c "echo 'keypress:spc' | nc -u 127.0.0.1 6789")) 
+    (multi (layer-toggle f-nav) (cmd sh -c "echo 'layer:f-nav' | nc -u 127.0.0.1 6789"))
+    (multi (layer-toggle f-nav) (cmd sh -c "echo 'layer:base' | nc -u 127.0.0.1 6789"))
+  )
+
+  ;; Regular keys with UDP tracking
+  q (multi q (cmd sh -c "echo 'keypress:q' | nc -u 127.0.0.1 6789"))
+  w (multi w (cmd sh -c "echo 'keypress:w' | nc -u 127.0.0.1 6789"))
+  e (multi e (cmd sh -c "echo 'keypress:e' | nc -u 127.0.0.1 6789"))
+  r (multi r (cmd sh -c "echo 'keypress:r' | nc -u 127.0.0.1 6789"))
+  t (multi t (cmd sh -c "echo 'keypress:t' | nc -u 127.0.0.1 6789"))
+  y (multi y (cmd sh -c "echo 'keypress:y' | nc -u 127.0.0.1 6789"))
+  u (multi u (cmd sh -c "echo 'keypress:u' | nc -u 127.0.0.1 6789"))
+  i (multi i (cmd sh -c "echo 'keypress:i' | nc -u 127.0.0.1 6789"))
+  o (multi o (cmd sh -c "echo 'keypress:o' | nc -u 127.0.0.1 6789"))
+  p (multi p (cmd sh -c "echo 'keypress:p' | nc -u 127.0.0.1 6789"))
+  h (multi h (cmd sh -c "echo 'keypress:h' | nc -u 127.0.0.1 6789"))
+  z (multi z (cmd sh -c "echo 'keypress:z' | nc -u 127.0.0.1 6789"))
+  x (multi x (cmd sh -c "echo 'keypress:x' | nc -u 127.0.0.1 6789"))
+  c (multi c (cmd sh -c "echo 'keypress:c' | nc -u 127.0.0.1 6789"))
+  v (multi v (cmd sh -c "echo 'keypress:v' | nc -u 127.0.0.1 6789"))
+  b (multi b (cmd sh -c "echo 'keypress:b' | nc -u 127.0.0.1 6789"))
+  n (multi n (cmd sh -c "echo 'keypress:n' | nc -u 127.0.0.1 6789"))
+  m (multi m (cmd sh -c "echo 'keypress:m' | nc -u 127.0.0.1 6789"))
+
+  ;; Navigation layer keys
+  fnav_h (multi left (cmd sh -c "echo 'navkey:h' | nc -u 127.0.0.1 6789"))
+  fnav_j (multi down (cmd sh -c "echo 'navkey:j' | nc -u 127.0.0.1 6789"))
+  fnav_k (multi up (cmd sh -c "echo 'navkey:k' | nc -u 127.0.0.1 6789"))
+  fnav_l (multi right (cmd sh -c "echo 'navkey:l' | nc -u 127.0.0.1 6789"))
+) 

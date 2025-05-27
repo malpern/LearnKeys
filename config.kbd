@@ -1,0 +1,257 @@
+;; =============================================================================
+;; LEARNKEYS KANATA CONFIG - CORRECTED ON-PRESS/ON-RELEASE SYNTAX
+;; =============================================================================
+;; Fixed: on-press and on-release expect two parameters: <action> <key-name>
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  log-layer-changes no
+)
+
+;; Timing variables
+(defvar
+  tap-time 200
+  hold-time 250
+)
+
+;; Source layout - standard QWERTY
+(defsrc
+  q w e r t y u i o p
+  a s d f g h j k l ;
+  z x c v b n m spc
+)
+
+;; Base layer - normal typing
+(deflayer base
+  @q @w @e @r @t @y @u @i @o @p
+  @a @s @d @f @g @h @j @k @l @;
+  @z @x @c @v @b @n @m @spc
+)
+
+;; Navigation layer (F-hold or spacebar-hold)
+(deflayer f-nav
+  _ _ _ _ _ _ _ _ _ _
+  _ _ _ _ _ @fnav_h @fnav_j @fnav_k @fnav_l _
+  _ _ _ _ _ _ _ _
+)
+
+;; Define fake keys for press/release tracking (corrected approach)
+(deffakekeys
+  shift-down (cmd sh -c "echo 'modifier:shift:down' | nc 127.0.0.1 6790")
+  shift-up (cmd sh -c "echo 'modifier:shift:up' | nc 127.0.0.1 6790")
+  control-down (cmd sh -c "echo 'modifier:control:down' | nc 127.0.0.1 6790")
+  control-up (cmd sh -c "echo 'modifier:control:up' | nc 127.0.0.1 6790")
+  option-down (cmd sh -c "echo 'modifier:option:down' | nc 127.0.0.1 6790")
+  option-up (cmd sh -c "echo 'modifier:option:up' | nc 127.0.0.1 6790")
+  command-down (cmd sh -c "echo 'modifier:command:down' | nc 127.0.0.1 6790")
+  command-up (cmd sh -c "echo 'modifier:command:up' | nc 127.0.0.1 6790")
+  layer-down (cmd sh -c "echo 'layer:f-nav:down' | nc 127.0.0.1 6790")
+  layer-up (cmd sh -c "echo 'layer:f-nav:up' | nc 127.0.0.1 6790")
+  navkey-h-down (cmd sh -c "echo 'navkey:h:down' | nc 127.0.0.1 6790")
+  navkey-h-up (cmd sh -c "echo 'navkey:h:up' | nc 127.0.0.1 6790")
+  navkey-j-down (cmd sh -c "echo 'navkey:j:down' | nc 127.0.0.1 6790")
+  navkey-j-up (cmd sh -c "echo 'navkey:j:up' | nc 127.0.0.1 6790")
+  navkey-k-down (cmd sh -c "echo 'navkey:k:down' | nc 127.0.0.1 6790")
+  navkey-k-up (cmd sh -c "echo 'navkey:k:up' | nc 127.0.0.1 6790")
+  navkey-l-down (cmd sh -c "echo 'navkey:l:down' | nc 127.0.0.1 6790")
+  navkey-l-up (cmd sh -c "echo 'navkey:l:up' | nc 127.0.0.1 6790")
+  debug-down (cmd sh -c "echo 'debug:k:down' | nc 127.0.0.1 6790")
+  debug-up (cmd sh -c "echo 'debug:k:up' | nc 127.0.0.1 6790")
+)
+
+(defalias
+  ;; =============================================================================
+  ;; DEBUG KEY - Simple test for on-release functionality
+  ;; =============================================================================
+  debug-key (multi
+    k ;; Send 'k' as normal
+    (on-press tap-virtualkey debug-down)
+    (on-release tap-virtualkey debug-up)
+  )
+
+  ;; =============================================================================
+  ;; LEFT HAND MODIFIERS - Corrected on-press/on-release syntax
+  ;; =============================================================================
+  
+  ;; A key - Left Shift with complete :down/:up tracking
+  a (tap-hold $tap-time $hold-time 
+    ;; Tap: send 'a' + notification
+    (multi a (cmd sh -c "echo 'keypress:a:tap' | nc 127.0.0.1 6790"))
+    ;; Hold: activate shift with press/release notifications
+    (multi 
+      lsft 
+      (on-press tap-virtualkey shift-down)
+      (on-release tap-virtualkey shift-up)
+    )
+  )
+  
+  ;; S key - Left Control with complete :down/:up tracking
+  s (tap-hold $tap-time $hold-time 
+    (multi s (cmd sh -c "echo 'keypress:s:tap' | nc 127.0.0.1 6790"))
+    (multi 
+      lctl 
+      (on-press tap-virtualkey control-down)
+      (on-release tap-virtualkey control-up)
+    )
+  )
+  
+  ;; D key - Left Option with complete :down/:up tracking
+  d (tap-hold $tap-time $hold-time 
+    (multi d (cmd sh -c "echo 'keypress:d:tap' | nc 127.0.0.1 6790"))
+    (multi 
+      lalt 
+      (on-press tap-virtualkey option-down)
+      (on-release tap-virtualkey option-up)
+    )
+  )
+  
+  ;; F key - Navigation layer with complete :down/:up tracking
+  f (tap-hold $tap-time $hold-time 
+    (multi f (cmd sh -c "echo 'keypress:f:tap' | nc 127.0.0.1 6790"))
+    (multi 
+      (layer-while-held f-nav)
+      (on-press tap-virtualkey layer-down)
+      (on-release tap-virtualkey layer-up)
+    )
+  )
+  
+  ;; G key - Left Command with complete :down/:up tracking
+  g (tap-hold $tap-time $hold-time 
+    (multi g (cmd sh -c "echo 'keypress:g:tap' | nc 127.0.0.1 6790"))
+    (multi 
+      lmet 
+      (on-press tap-virtualkey command-down)
+      (on-release tap-virtualkey command-up)
+    )
+  )
+
+  ;; =============================================================================
+  ;; RIGHT HAND MODIFIERS - Corrected on-press/on-release syntax
+  ;; =============================================================================
+  
+  ;; J key - Right Command
+  j (tap-hold $tap-time $hold-time 
+    (multi j (cmd sh -c "echo 'keypress:j:tap' | nc 127.0.0.1 6790"))
+    (multi 
+      rmet 
+      (on-press tap-virtualkey command-down)
+      (on-release tap-virtualkey command-up)
+    )
+  )
+  
+  ;; K key - Right Option (also debug key for testing)
+  k (tap-hold $tap-time $hold-time 
+    @debug-key  ;; Tap: use debug key for testing
+    (multi 
+      ralt 
+      (on-press tap-virtualkey option-down)
+      (on-release tap-virtualkey option-up)
+    )
+  )
+  
+  ;; L key - Right Control
+  l (tap-hold $tap-time $hold-time 
+    (multi l (cmd sh -c "echo 'keypress:l:tap' | nc 127.0.0.1 6790"))
+    (multi 
+      rctl 
+      (on-press tap-virtualkey control-down)
+      (on-release tap-virtualkey control-up)
+    )
+  )
+  
+  ;; ; key - Right Shift
+  ; (tap-hold $tap-time $hold-time 
+    (multi ; (cmd sh -c "echo 'keypress:semicolon:tap' | nc 127.0.0.1 6790"))
+    (multi 
+      rsft 
+      (on-press tap-virtualkey shift-down)
+      (on-release tap-virtualkey shift-up)
+    )
+  )
+
+  ;; Spacebar with navigation layer and complete :down/:up tracking
+  spc (tap-hold $tap-time $hold-time 
+    (multi spc (cmd sh -c "echo 'keypress:spc:tap' | nc 127.0.0.1 6790"))
+    (multi 
+      (layer-while-held f-nav)
+      (on-press tap-virtualkey layer-down)
+      (on-release tap-virtualkey layer-up)
+    )
+  )
+
+  ;; =============================================================================
+  ;; REGULAR KEYS - Simple TCP tracking
+  ;; =============================================================================
+  q (multi q (cmd sh -c "echo 'keypress:q' | nc 127.0.0.1 6790"))
+  w (multi w (cmd sh -c "echo 'keypress:w' | nc 127.0.0.1 6790"))
+  e (multi e (cmd sh -c "echo 'keypress:e' | nc 127.0.0.1 6790"))
+  r (multi r (cmd sh -c "echo 'keypress:r' | nc 127.0.0.1 6790"))
+  t (multi t (cmd sh -c "echo 'keypress:t' | nc 127.0.0.1 6790"))
+  y (multi y (cmd sh -c "echo 'keypress:y' | nc 127.0.0.1 6790"))
+  u (multi u (cmd sh -c "echo 'keypress:u' | nc 127.0.0.1 6790"))
+  i (multi i (cmd sh -c "echo 'keypress:i' | nc 127.0.0.1 6790"))
+  o (multi o (cmd sh -c "echo 'keypress:o' | nc 127.0.0.1 6790"))
+  p (multi p (cmd sh -c "echo 'keypress:p' | nc 127.0.0.1 6790"))
+  h (multi h (cmd sh -c "echo 'keypress:h' | nc 127.0.0.1 6790"))
+  z (multi z (cmd sh -c "echo 'keypress:z' | nc 127.0.0.1 6790"))
+  x (multi x (cmd sh -c "echo 'keypress:x' | nc 127.0.0.1 6790"))
+  c (multi c (cmd sh -c "echo 'keypress:c' | nc 127.0.0.1 6790"))
+  v (multi v (cmd sh -c "echo 'keypress:v' | nc 127.0.0.1 6790"))
+  b (multi b (cmd sh -c "echo 'keypress:b' | nc 127.0.0.1 6790"))
+  n (multi n (cmd sh -c "echo 'keypress:n' | nc 127.0.0.1 6790"))
+  m (multi m (cmd sh -c "echo 'keypress:m' | nc 127.0.0.1 6790"))
+
+  ;; =============================================================================
+  ;; NAVIGATION LAYER KEYS - Complete :down/:up tracking
+  ;; =============================================================================
+  fnav_h (multi 
+    left 
+    (on-press tap-virtualkey navkey-h-down)
+    (on-release tap-virtualkey navkey-h-up)
+  )
+  fnav_j (multi 
+    down 
+    (on-press tap-virtualkey navkey-j-down)
+    (on-release tap-virtualkey navkey-j-up)
+  )
+  fnav_k (multi 
+    up 
+    (on-press tap-virtualkey navkey-k-down)
+    (on-release tap-virtualkey navkey-k-up)
+  )
+  fnav_l (multi 
+    right 
+    (on-press tap-virtualkey navkey-l-down)
+    (on-release tap-virtualkey navkey-l-up)
+  )
+)
+
+;; =============================================================================
+;; LEARNKEYS DISPLAY METADATA (Valid Kanata Comments)
+;; =============================================================================
+;;DISPLAY: fnav_h "left" "←"
+;;DISPLAY: fnav_j "down" "↓"
+;;DISPLAY: fnav_k "up" "↑"
+;;DISPLAY: fnav_l "right" "→"
+
+;; =============================================================================
+;; DEBUG NOTES
+;; =============================================================================
+;; To test release events:
+;; 1. Run with debug: sudo kanata --cfg config.kbd --debug
+;; 2. Test simple case: tap 'k' key (should show debug:k:down and debug:k:up)
+;; 3. Test modifier: hold 'a' key >250ms (should show modifier:shift:down and modifier:shift:up)
+;; 4. Test navigation: hold 'f' then press/release 'h' (should show layer and navkey events)
+;; 5. Monitor TCP: nc -l 6790 (in another terminal)
+;; 6. Check file logs: tail -f /tmp/kanata_release_test.log (if using file debug)
+
+
+
+
+
+
+
+
+

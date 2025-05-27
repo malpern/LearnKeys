@@ -1,0 +1,48 @@
+;; MINIMAL TEST HARNESS - SINGLE KEY FOCUS
+;; Testing ONLY the 'a' key shift modifier issue
+;; Expected messages: KEY_A (tap), SHIFT_DOWN (hold), SHIFT_UP (release)
+;; UPDATED: Using file output instead of network calls
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  log-layer-changes no
+)
+
+(defsrc
+  a
+)
+
+(defvar
+  a-tap-time 300
+  a-hold-time 200
+  left-hand-keys (
+    q w e r t
+    a s d f g
+    z x c v b
+  )
+)
+
+(deflayer base
+  @a_test
+)
+
+(defalias
+  shift lsft
+  shift-with-file (fork 
+    (multi @shift (cmd sh -c "echo 'SHIFT_DOWN' >> /tmp/kanata_test.log"))
+    (cmd sh -c "echo 'SHIFT_UP' >> /tmp/kanata_test.log")
+    ()
+  )
+  a_test (tap-hold-release-keys $a-tap-time $a-hold-time 
+    (multi a (cmd sh -c "echo 'KEY_A' >> /tmp/kanata_test.log")) 
+    @shift-with-file 
+    $left-hand-keys
+  )
+)
+
+;; Test configuration notes:
+;; 1. Using file output instead of network calls
+;; 2. Fork construct handles both SHIFT_DOWN (press) and SHIFT_UP (release)
+;; 3. This completely eliminates any network-related variables 

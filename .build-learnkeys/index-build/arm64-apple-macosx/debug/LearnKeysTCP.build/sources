@@ -1,0 +1,12 @@
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/App/LearnKeysTCPApp.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Core/AnimationController.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Core/LayerManager.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Core/TCPKeyTracker.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Models/KanataConfig.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Models/KeyState.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Utils/KanataManager.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Utils/KeyCodeMapper.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Utils/LogManager.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Views/KeyView.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Views/KeyboardView.swift
+/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Views/LayerIndicator.swift

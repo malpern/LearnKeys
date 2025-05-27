@@ -1,0 +1,38 @@
+;; MINIMAL NO-FORK TEST - SINGLE KEY FOCUS
+;; Testing ONLY the 'a' key using tap-hold-release instead of fork
+;; Expected messages: KEY_A (tap), SHIFT_DOWN (hold start), SHIFT_UP (hold end)
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+  log-layer-changes no
+)
+
+(defsrc
+  a
+)
+
+(defvar
+  a-tap-time 300
+  a-hold-time 200
+)
+
+(deflayer base
+  @a_test
+)
+
+(defalias
+  shift lsft
+  
+  ;; No-fork approach: use simple tap-hold with on-release
+  a_test (tap-hold $a-tap-time $a-hold-time 
+    ;; Tap action: send KEY_A
+    (multi a (cmd sh -c "echo 'KEY_A' >> /tmp/kanata_test.log"))
+    ;; Hold action: send SHIFT_DOWN and activate shift
+    (multi @shift (cmd sh -c "echo 'SHIFT_DOWN' >> /tmp/kanata_test.log"))
+  )
+  
+  ;; Note: This simplified approach won't send SHIFT_UP on release
+  ;; We need to test if the basic functionality works first
+) 

@@ -1,0 +1,77 @@
+{
+  "": {
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/master.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/App/LearnKeysTCPApp.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LearnKeysTCPApp.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LearnKeysTCPApp.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LearnKeysTCPApp~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LearnKeysTCPApp.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Core/AnimationController.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/AnimationController.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/AnimationController.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/AnimationController~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/AnimationController.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Core/LayerManager.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LayerManager.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LayerManager.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LayerManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LayerManager.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Core/TCPKeyTracker.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/TCPKeyTracker.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/TCPKeyTracker.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/TCPKeyTracker~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/TCPKeyTracker.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Models/KanataConfig.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KanataConfig.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KanataConfig.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KanataConfig~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KanataConfig.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Models/KeyState.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyState.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyState.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyState~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyState.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Utils/KanataManager.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KanataManager.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KanataManager.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KanataManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KanataManager.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Utils/KeyCodeMapper.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyCodeMapper.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyCodeMapper.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyCodeMapper~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyCodeMapper.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Utils/LogManager.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LogManager.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LogManager.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LogManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LogManager.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Views/KeyView.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyView.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyView.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyView~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyView.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Views/KeyboardView.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyboardView.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyboardView.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyboardView~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/KeyboardView.swiftdeps"
+  },
+  "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/Views/LayerIndicator.swift": {
+    "dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LayerIndicator.d",
+    "object": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LayerIndicator.swift.o",
+    "swiftmodule": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LayerIndicator~partial.swiftmodule",
+    "swift-dependencies": "/Users/malpern/Library/CloudStorage/Dropbox/code/LearnKeys/LearnKeysUDP-Clean/.build/index-build/arm64-apple-macosx/debug/LearnKeysTCP.build/LayerIndicator.swiftdeps"
+  }
+}

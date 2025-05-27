@@ -1,71 +1,124 @@
 import Foundation
+import os.log
 
-/// Logging configuration and manager
+/// Centralized logging system for LearnKeys TCP
+/// Supports both console and file logging with configurable levels
 class LogManager {
     static let shared = LogManager()
     
-    private let fileLogger: FileHandle?
-    private let logQueue = DispatchQueue(label: "LogManager", qos: .background)
-    private let enableConsole: Bool
-    private let enableFile: Bool
+    private let logger = Logger(subsystem: "com.learnkeys.tcp", category: "main")
+    private let logQueue = DispatchQueue(label: "com.learnkeys.tcp.logging", qos: .utility)
+    private let logFileURL: URL
     
-    init() {
-        // Check for environment variables or default settings
-        self.enableConsole = ProcessInfo.processInfo.environment["LOG_CONSOLE"] != "false"
-        self.enableFile = ProcessInfo.processInfo.environment["LOG_FILE"] != "false"
+    // Configuration
+    private let consoleLoggingEnabled: Bool
+    private let fileLoggingEnabled: Bool
+    
+    private init() {
+        // Configure logging based on environment variables
+        self.consoleLoggingEnabled = ProcessInfo.processInfo.environment["LOG_CONSOLE"] != "false"
+        self.fileLoggingEnabled = ProcessInfo.processInfo.environment["LOG_FILE"] != "false"
         
-        // Create log file in a more accessible location
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        let logURL = URL(fileURLWithPath: documentsPath).appendingPathComponent("LearnKeysUDP.log")
+        // Setup log file path
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        self.logFileURL = documentsPath.appendingPathComponent("LearnKeysTCP.log")
         
-        if enableFile {
-            // Create or append to log file
-            if !FileManager.default.fileExists(atPath: logURL.path) {
-                FileManager.default.createFile(atPath: logURL.path, contents: nil)
-            }
-            
-            fileLogger = try? FileHandle(forWritingTo: logURL)
-            fileLogger?.seekToEndOfFile()
-            
-            if fileLogger != nil {
-                log("📝 Logging to: \(logURL.path)", category: "LOG")
-            }
-        } else {
-            fileLogger = nil
+        // Create log file if it doesn't exist
+        if fileLoggingEnabled && !FileManager.default.fileExists(atPath: logFileURL.path) {
+            FileManager.default.createFile(atPath: logFileURL.path, contents: nil, attributes: nil)
         }
-        
-        // Log startup information
-        log("🚀 LogManager initialized", category: "LOG")
-        log("📊 Console logging: \(enableConsole ? "ON" : "OFF")", category: "LOG")
-        log("📂 File logging: \(enableFile ? "ON" : "OFF")", category: "LOG")
     }
     
-    func log(_ message: String, category: String = "UDP") {
-        let timestamp = ISO8601DateFormatter().string(from: Date())
-        let logEntry = "[\(timestamp)] [\(category)] \(message)"
+    /// Log a message with category and level
+    func log(_ message: String, category: LogCategory = .general, level: LogLevel = .info) {
+        let timestamp = DateFormatter.logFormatter.string(from: Date())
+        let formattedMessage = "[\(timestamp)] [\(category.rawValue)] [\(level.rawValue)] \(message)"
         
-        logQueue.async {
+        logQueue.async { [weak self] in
             // Console logging
-            if self.enableConsole {
-                print(logEntry)
+            if self?.consoleLoggingEnabled == true {
+                print(formattedMessage)
             }
             
             // File logging
-            if let fileLogger = self.fileLogger {
-                if let data = (logEntry + "\n").data(using: .utf8) {
-                    fileLogger.write(data)
-                }
+            if self?.fileLoggingEnabled == true {
+                self?.writeToFile(formattedMessage)
             }
         }
     }
     
-    // Get log file path for testing
-    func getLogFilePath() -> String? {
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: documentsPath).appendingPathComponent("LearnKeysUDP.log").path
+    private func writeToFile(_ message: String) {
+        guard let data = (message + "\n").data(using: .utf8) else { return }
+        
+        if let fileHandle = try? FileHandle(forWritingTo: logFileURL) {
+            fileHandle.seekToEndOfFile()
+            fileHandle.write(data)
+            fileHandle.closeFile()
+        }
+    }
+}
+
+// MARK: - Log Categories
+enum LogCategory: String, CaseIterable {
+    case general = "GENERAL"
+    case tcp = "TCP"
+    case key = "KEY"
+    case nav = "NAV"
+    case modifier = "MOD"
+    case layer = "LAYER"
+    case animation = "ANIM"
+    case error = "ERROR"
+    case initialization = "INIT"
+}
+
+// MARK: - Log Levels
+enum LogLevel: String, CaseIterable {
+    case debug = "DEBUG"
+    case info = "INFO"
+    case warning = "WARN"
+    case error = "ERROR"
+}
+
+// MARK: - Date Formatter Extension
+private extension DateFormatter {
+    static let logFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+        return formatter
+    }()
+}
+
+// MARK: - Convenience Methods
+extension LogManager {
+    func logTCP(_ message: String) {
+        log(message, category: .tcp)
     }
     
-    deinit {
-        fileLogger?.closeFile()
+    func logKey(_ message: String) {
+        log(message, category: .key)
     }
-} 
+    
+    func logNav(_ message: String) {
+        log(message, category: .nav)
+    }
+    
+    func logModifier(_ message: String) {
+        log(message, category: .modifier)
+    }
+    
+    func logLayer(_ message: String) {
+        log(message, category: .layer)
+    }
+    
+    func logAnimation(_ message: String) {
+        log(message, category: .animation)
+    }
+    
+    func logError(_ message: String) {
+        log(message, category: .error, level: .error)
+    }
+    
+    func logInit(_ message: String) {
+        log(message, category: .initialization)
+    }
+}
