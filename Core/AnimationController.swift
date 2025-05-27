@@ -35,9 +35,9 @@ class AnimationController: ObservableObject {
             self?.transitionToLayer(layer)
         }
         
-        // Navigation animations
-        tcpTracker.onNavigationKey = { [weak self] key in
-            self?.animateNavigation(key)
+        // Navigation key state changes
+        tcpTracker.onNavigationKeyChange = { [weak self] key, isActive in
+            self?.updateNavigationKeyState(key, isActive: isActive)
         }
     }
     
@@ -45,7 +45,7 @@ class AnimationController: ObservableObject {
     
     private func animateKeyPress(_ key: String) {
         DispatchQueue.main.async {
-fffjlkjaasdf            // Suppress all home row letter animations in f-nav layer
+            // Suppress all home row letter animations in f-nav layer
             let homeRowKeys = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"]
             if self.currentLayer == "f-nav" && homeRowKeys.contains(key.lowercased()) {
                 LogManager.shared.log("🚫 Suppressing home row letter animation for \(key) in f-nav layer")
@@ -64,16 +64,11 @@ fffjlkjaasdf            // Suppress all home row letter animations in f-nav laye
         }
     }
     
-    private func animateNavigation(_ key: String) {
+    private func updateNavigationKeyState(_ key: String, isActive: Bool) {
         DispatchQueue.main.async {
-            LogManager.shared.log("🧭 Animating navigation: \(key)")
-            
-            self.keyStates[key] = KeyState(key: key, isPressed: true, keyType: .navigation)
-            
-            // Navigation animations are faster
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                self.keyStates[key]?.isPressed = false
-            }
+            LogManager.shared.log("🧭 Updating navigation key state: \(key) -> \(isActive ? "pressed" : "released")")
+            self.keyStates[key] = KeyState(key: key, isPressed: isActive, keyType: .navigation)
+            // No automatic deactivation timer needed here, state is driven by :down/:up events
         }
     }
     
@@ -116,15 +111,28 @@ fffjlkjaasdf            // Suppress all home row letter animations in f-nav laye
     }
     
     private func determineKeyType(_ key: String) -> KeyState.KeyType {
-        // Determine key type based on key name
-        switch key.lowercased() {
-        case "h", "j", "k", "l", "w", "b", "e": // vim-like navigation
-            return .navigation
+        let lowercasedKey = key.lowercased()
+        
+        // Check for navigation keys only if in a navigation layer
+        if currentLayer == "f-nav" { // Add other nav layers here if any, e.g., || currentLayer == "navfast"
+            switch lowercasedKey {
+            case "h", "j", "k", "l": // Add other nav-specific keys if any
+                return .navigation
+            default:
+                break // Continue to other checks if not a nav key in nav layer
+            }
+        }
+        
+        // Check for modifiers (this can be layer-independent or layer-dependent as needed)
+        switch lowercasedKey {
         case "shift", "ctrl", "alt", "cmd", "control", "option", "command":
             return .modifier
         default:
-            return .regular
+            break // Not a modifier, proceed to regular
         }
+        
+        // Default to regular if no other type matches
+        return .regular
     }
     
     // MARK: - Public Interface for Views
@@ -178,8 +186,13 @@ extension AnimationController {
                 updateModifierState(modifier, isActive: isActive)
             }
         case "navkey":
-            if components.count >= 2 {
-                animateNavigation(String(components[1]))
+            if components.count >= 3 {
+                let key = String(components[1])
+                let isActive = String(components[2]) == "down"
+                updateNavigationKeyState(key, isActive: isActive)
+            } else if components.count == 2 {
+                LogManager.shared.log("⚠️ Test message 'navkey:\(components[1])' is using old format. Simulating press only.")
+                updateNavigationKeyState(String(components[1]), isActive: true)
             }
         case "layer":
             if components.count >= 2 {

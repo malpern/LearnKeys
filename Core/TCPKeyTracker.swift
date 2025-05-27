@@ -13,13 +13,12 @@ class TCPKeyTracker: ObservableObject {
     var onKeyPress: ((String) -> Void)?
     var onModifierChange: ((String, Bool) -> Void)?
     var onLayerChange: ((String) -> Void)?
-    var onNavigationKey: ((String) -> Void)?
+    var onNavigationKeyChange: ((String, Bool) -> Void)?
     
     private var listener: NWListener?
     private let port: NWEndpoint.Port = 6790  // TCP port 6790 to match Kanata config
     private let queue = DispatchQueue(label: "tcp-key-tracker")
     private var keyTimers: [String: Timer] = [:]
-    private var navKeyTimers: [String: Timer] = [:]
     private var modifierTimers: [String: Timer] = [:]
     private var activeConnections: [NWConnection] = []
     
@@ -134,6 +133,11 @@ class TCPKeyTracker: ObservableObject {
             print("🔗 📡 Parsed as navigation key message")
             parseNavKeyMessage(message)
         } else if message.hasPrefix("keypress:") {
+            // Only process keypress messages if we are in the base layer
+            guard currentLayer == "base" else {
+                print("🔗 ⌨️  Ignoring keypress message because current layer is not base: '\(currentLayer)'")
+                return
+            }
             var key = String(message.dropFirst(9)) // Remove "keypress:" prefix
             print("🔗 ⌨️  Parsed as basic keypress: '\(key)'")
 
@@ -188,29 +192,35 @@ class TCPKeyTracker: ObservableObject {
     private func parseNavKeyMessage(_ message: String) {
         let components = message.components(separatedBy: ":")
         
-        if components.count == 2 {
-            // Old format: navkey:h (just activate the key)
-            let key = components[1].lowercased()
-            print("🔗 📡 Processing navkey (old format): '\(key)'")
-            activateNavKey(key)
-            onNavigationKey?(key)
-        } else if components.count >= 3 {
-            // New format: navkey:h:down or navkey:h:up
-            let key = components[1].lowercased()
-            let action = components[2].lowercased()
-            
-            print("🔗 📡 Processing navkey: '\(key)' action: '\(action)'")
-            
-            if action == "down" {
-                activateNavKey(key)
-                onNavigationKey?(key)
-            } else if action == "up" {
-                deactivateNavKey(key)
+        // Expecting navkey:key:action format (e.g., navkey:h:down)
+        guard components.count >= 3 else {
+            // Log if it's the old format or an invalid new format
+            if components.count == 2 {
+                let key = components[1].lowercased()
+                print("🔗 📡 Processing navkey (old format - DEPRECATED): '\\(key)'. Please update Kanata config to use navkey:key:down/up.")
+                // For backward compatibility, treat old format as a "down" event.
+                // Consider removing this block if old format is no longer supported.
+                activateNavKey(key) // Keep existing activation logic for old format if needed
+                onNavigationKeyChange?(key, true) // Notify as 'down'
             } else {
-                print("🔗 ❌ Unknown navkey action: '\(action)' for key: '\(key)'")
+                print("🔗 ❌ TCP INVALID navkey message format: '\\(message)' - use 'navkey:key:down/up'")
             }
+            return
+        }
+            
+        let key = components[1].lowercased()
+        let action = components[2].lowercased()
+            
+        print("🔗 📡 Processing navkey: '\\(key)' action: '\\(action)'")
+            
+        if action == "down" {
+            activateNavKey(key)
+            onNavigationKeyChange?(key, true)
+        } else if action == "up" {
+            deactivateNavKey(key)
+            onNavigationKeyChange?(key, false)
         } else {
-            print("🔗 ❌ TCP INVALID navkey message format: '\(message)' - use 'navkey:key' or 'navkey:key:down/up'")
+            print("🔗 ❌ Unknown navkey action: '\\(action)' for key: '\\(key)'")
         }
     }
     
@@ -272,18 +282,10 @@ class TCPKeyTracker: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            print("🔗 📡 Activating nav key: \(key)")
+            print("🔗 📡 Activating nav key: \\(key)")
             self.activeNavKeys.insert(key)
             
-            // Cancel any existing timer for this key
-            self.navKeyTimers[key]?.invalidate()
-            
-            // Set a timer to deactivate the key after a short duration (fallback)
-            self.navKeyTimers[key] = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
-                print("🔗 ⏰ Timer fallback: Deactivating nav key: \(key)")
-                self.activeNavKeys.remove(key)
-                self.navKeyTimers.removeValue(forKey: key)
-            }
+            // navKeyTimers logic removed
         }
     }
     
@@ -291,10 +293,9 @@ class TCPKeyTracker: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            print("🔗 📡 Deactivating nav key: \(key)")
+            print("🔗 📡 Deactivating nav key: \\(key)")
             self.activeNavKeys.remove(key)
-            self.navKeyTimers[key]?.invalidate()
-            self.navKeyTimers.removeValue(forKey: key)
+            // navKeyTimers logic removed
         }
     }
     
@@ -415,9 +416,6 @@ class TCPKeyTracker: ObservableObject {
         keyTimers.values.forEach { $0.invalidate() }
         keyTimers.removeAll()
         
-        navKeyTimers.values.forEach { $0.invalidate() }
-        navKeyTimers.removeAll()
-        
         modifierTimers.values.forEach { $0.invalidate() }
         modifierTimers.removeAll()
         
@@ -443,16 +441,19 @@ class TCPKeyTracker: ObservableObject {
         }
     }
     
-    // MARK: - Debug Methods
-    
+    // MARK: - Debug Methods and Public Interface are now in an extension below
+} // End of TCPKeyTracker class body
+
+// MARK: - Debug Methods
+extension TCPKeyTracker {
     func debugModifierDown(_ modifier: String) {
-        print("🔗 🐛 DEBUG: Manually triggering modifier down: \(modifier)")
-        processMessage("modifier:\(modifier):down")
+        print("🔗 🐛 DEBUG: Manually triggering modifier down: \\(modifier)")
+        processMessage("modifier:\\(modifier):down")
     }
     
     func debugModifierUp(_ modifier: String) {
-        print("🔗 🐛 DEBUG: Manually triggering modifier up: \(modifier)")
-        processMessage("modifier:\(modifier):up")
+        print("🔗 🐛 DEBUG: Manually triggering modifier up: \\(modifier)")
+        processMessage("modifier:\\(modifier):up")
     }
     
     func debugClearAllModifiers() {
@@ -461,7 +462,7 @@ class TCPKeyTracker: ObservableObject {
             guard let self = self else { return }
             
             for modifier in self.activeModifiers {
-                print("🔗 🐛 DEBUG: Force clearing modifier: \(modifier)")
+                print("🔗 🐛 DEBUG: Force clearing modifier: \\(modifier)")
             }
             
             self.activeModifiers.removeAll()
@@ -471,9 +472,10 @@ class TCPKeyTracker: ObservableObject {
             print("🔗 🐛 DEBUG: All modifiers cleared")
         }
     }
-    
-    // MARK: - Public Interface
-    
+}
+
+// MARK: - Public Interface
+extension TCPKeyTracker {
     func isNavKeyActive(_ physicalKey: String) -> Bool {
         return activeNavKeys.contains(physicalKey.lowercased())
     }
@@ -481,7 +483,7 @@ class TCPKeyTracker: ObservableObject {
     func isKeyActive(_ physicalKey: String) -> Bool {
         let isActive = activeKeys.contains(physicalKey.lowercased())
         if isActive {
-            print("🔗 🔍 UI Query: Key '\(physicalKey)' is ACTIVE via TCP")
+            print("🔗 🔍 UI Query: Key '\\(physicalKey)' is ACTIVE via TCP")
         }
         return isActive
     }
@@ -489,7 +491,7 @@ class TCPKeyTracker: ObservableObject {
     func isModifierActive(_ modifier: String) -> Bool {
         let isActive = activeModifiers.contains(modifier.lowercased())
         if isActive {
-            print("🔗 🔍 UI Query: Modifier '\(modifier)' is ACTIVE via TCP")
+            print("🔗 🔍 UI Query: Modifier '\\(modifier)' is ACTIVE via TCP")
         }
         return isActive
     }

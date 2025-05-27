@@ -25,8 +25,8 @@ class HeadlessTCPServer {
             LogManager.shared.log("✅ HEADLESS: Key press processed - \(key)")
         }
         
-        tcpTracker?.onNavigationKey = { key in
-            LogManager.shared.log("✅ HEADLESS: Navigation key processed - \(key)")
+        tcpTracker?.onNavigationKeyChange = { key, isActive in
+            LogManager.shared.log("✅ HEADLESS: Navigation key '\(key)' \(isActive ? "pressed" : "released")")
         }
         
         tcpTracker?.onModifierChange = { modifier, isActive in
@@ -87,7 +87,6 @@ struct LearnKeyApp: App {
                 exit(1) // Exit immediately
                 // The 'return' here is now effectively unreachable but kept for clarity
                 // that no further initialization in this block should occur.
-                return
             }
             
             LogManager.shared.logInit("🚀 Starting GUI mode - Kanata should be launched separately")
@@ -257,12 +256,12 @@ struct HeaderView: View {
     var body: some View {
         VStack(spacing: 10) {
             HStack {
-                Text("LearnKeys")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                // Text("LearnKeys") // Removed "LearnKeys" label
+                //     .font(.title)
+                //     .fontWeight(.bold)
+                //     .foregroundColor(.white)
                 
-                Spacer()
+                Spacer() // This will push the layer indicator to the right if nothing else is on the left
                 
                 // Text("config.kbd")
                 //     .font(.caption)
@@ -270,7 +269,10 @@ struct HeaderView: View {
             }
             
             HStack {
-                Text("Layer: \(animationController.currentLayer)")
+                Image(systemName: "line.3.horizontal") // SF Symbol for layer
+                    .font(.headline) // Match size with text
+                    .foregroundColor(.blue)
+                Text(" \(animationController.currentLayer)") // Removed colon, added space for separation
                     .font(.headline)
                     .foregroundColor(.blue)
                 
@@ -374,18 +376,20 @@ struct AnimatedLetterRowView: View {
         return HStack(spacing: slotSpacing) {
             ForEach(letters, id: \.self) { letter in
                 let physicalKey = letter.lowercased()
-                let isActive = animationController.getKeyState(physicalKey)?.isPressed ?? false
+                let keyState = animationController.getKeyState(physicalKey)
+                let shouldShowSmallLetter = !(keyState?.isPressed ?? false) || keyState?.keyType != .regular
+                let isActiveAndRegular = (keyState?.isPressed ?? false) && (keyState?.keyType == .regular)
                 
                 ZStack {
                     GeometryReader { geo in
-                        if !isActive {
+                        if shouldShowSmallLetter && !isActiveAndRegular { // Show small if not active OR not regular, and not active+regular
                             Text(letter)
                                 .font(.system(size: smallFontSize, weight: .light, design: .rounded))
                                 .foregroundColor(.white.opacity(0.7))
                                 .frame(width: slotWidth, height: overlayFrameHeight)
                                 .position(x: drawWidth / 2, y: overlayFrameHeight / 2)
                                 .transition(.scale)
-                                .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isActive)
+                                .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isActiveAndRegular)
                         }
                     }
                     .frame(width: drawWidth, height: overlayFrameHeight)
@@ -406,9 +410,10 @@ struct AnimatedLetterRowView: View {
                 let index = pair.offset
                 let letter = pair.element
                 let physicalKey = letter.lowercased()
-                let isActive = animationController.getKeyState(physicalKey)?.isPressed ?? false
+                let keyState = animationController.getKeyState(physicalKey)
+                let isActiveAndRegular = (keyState?.isPressed ?? false) && (keyState?.keyType == .regular)
                 
-                if isActive {
+                if isActiveAndRegular {
                     Text(letter)
                         .font(.system(size: largeFontSize, weight: .black, design: .rounded))
                         .foregroundColor(.white)
@@ -416,7 +421,7 @@ struct AnimatedLetterRowView: View {
                         .frame(width: drawWidth, height: overlayFrameHeight)
                         .position(x: CGFloat(index) * (slotWidth + slotSpacing) + slotWidth / 2,
                                   y: overlayFrameHeight / 2)
-                        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isActive)
+                        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isActiveAndRegular)
                         .zIndex(2)
                 }
             }
